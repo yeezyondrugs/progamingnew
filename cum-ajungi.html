@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="ro">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Cum ajungi la ProGaming Hub | Bd Mircea cel Bătrân 3, Ciocana</title>
+        <meta
+            name="description"
+            content="Cum ajungi la ProGaming Hub din Ciocana, Chișinău: stații și linii de troleibuz și autobuz, traseu cu mașina sau taxi, hartă. Bd Mircea cel Bătrân 3."
+        />
+        <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="images/favicon-192.png" />
+        <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+        <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css" />
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <nav id="navbar">
+            <div class="nav-container">
+                <a href="index.html" class="logo">
+                    <img src="images/favicon-192.png" alt="" width="48" height="48" />
+                    <span>ProGaming Hub</span>
+                </a>
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="index.html">Acasă</a></li>
+                    <li><a href="index.html#despre">Despre</a></li>
+                    <li><a href="index.html#preturi">Prețuri</a></li>
+                    <li><a href="index.html#calculator">Calculator</a></li>
+                    <li><a href="index.html#servicii">Servicii</a></li>
+                    <li><a href="index.html#galerie">Galerie</a></li>
+                    <li><a href="index.html#contact">Contact</a></li>
+                    <li>
+                        <a href="tel:076764676" class="nav-cta">
+                            <i class="fas fa-phone-alt"></i>
+                            Sună acum
+                        </a>
+                    </li>
+                </ul>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Meniu"><i class="fas fa-bars"></i></button>
+            </div>
+        </nav>
+
+        <section class="hero page-hero" id="home">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-location-dot"></i>
+                    Ciocana · Chișinău
+                </div>
+                <h1>
+                    Cum ajungi
+                    <br />
+                    la noi
+                </h1>
+                <p>
+                    Ne găsești pe
+                    <strong>Bd Mircea cel Bătrân 3</strong>, la un minut de stația „Strada Ginta Latină”. Alege cum vii și pornește traseul.
+                </p>
+                <div class="hero-buttons">
+                    <a
+                        href="https://www.google.com/maps/dir/?api=1&destination=47.0384012,28.8889709"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="btn btn-primary"
+                    >
+                        <i class="fas fa-route"></i>
+                        Pornește traseul
+                    </a>
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-copy="Pro Gaming Hub, Bulevardul Mircea cel Bătrân 3, Chișinău MD-2044"
+                    >
+                        <i class="fas fa-copy"></i>
+                        Copiază adresa
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <div class="footer-map route-map" id="harta">
+            <div
+                id="locationMap"
+                role="img"
+                aria-label="Hartă OpenStreetMap cu locația ProGaming Hub și stațiile de transport din apropiere"
+            ></div>
+            <a
+                class="map-google-link"
+                href="https://maps.app.goo.gl/zaMdQbcYprTKzVT28"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                Deschide în Google Maps
+            </a>
+        </div>
+
+        <section id="transport">
+            <div class="section-header">
+                <div class="section-badge">Transport public</div>
+                <h2>Cu troleibuzul sau autobuzul</h2>
+                <p>
+                    Trei stații sunt la mai puțin de 200 de metri de club. Distanțele sunt aproximative, în linie
+                    dreaptă.
+                </p>
+            </div>
+            <div class="stops-grid">
+                <div class="stop-card">
+                    <span class="stop-dist">~60 m</span>
+                    <h3>Strada Ginta Latină</h3>
+                    <p>
+                        Cea mai apropiată stație, pe bulevard. De aici pleacă liniile
+                        <strong>spre centru</strong>
+                        — aici cobori dacă vii dinspre str. Ion Dumeniuc.
+                    </p>
+                    <div class="line-chips">
+                        <span class="line">12</span>
+                        <span class="line">13</span>
+                        <span class="line">23</span>
+                        <span class="line">24</span>
+                        <span class="line">26</span>
+                        <span class="line bus">5</span>
+                        <span class="line bus">23</span>
+                    </div>
+                </div>
+                <div class="stop-card">
+                    <span class="stop-dist">~140 m</span>
+                    <h3>Bulevardul Mircea cel Bătrân</h3>
+                    <p>
+                        Stația de pe partea opusă, cu liniile
+                        <strong>spre capătul bulevardului</strong>
+                        — aici cobori dacă vii dinspre centru.
+                    </p>
+                    <div class="line-chips">
+                        <span class="line">12</span>
+                        <span class="line">13</span>
+                        <span class="line">23</span>
+                        <span class="line">24</span>
+                        <span class="line">26</span>
+                        <span class="line bus">5</span>
+                        <span class="line bus">23</span>
+                    </div>
+                </div>
+                <div class="stop-card">
+                    <span class="stop-dist">~180 m</span>
+                    <h3>Strada Alecu Russo</h3>
+                    <p>
+                        Pentru liniile care nu merg pe bulevard. În sens opus, aceleași linii opresc la „Strada Meșterul
+                        Manole”.
+                    </p>
+                    <div class="line-chips">
+                        <span class="line">16</span>
+                        <span class="line">21</span>
+                    </div>
+                </div>
+            </div>
+            <p class="lines-legend">
+                <span class="line">12</span>
+                troleibuz
+                <span class="line bus">5</span>
+                autobuz
+            </p>
+
+            <h3 class="lines-title">Pe unde circulă fiecare linie</h3>
+            <ul class="lines-list">
+                <li>
+                    <span class="line">12</span>
+                    Universitatea de Stat (str. A. Mateevici)
+                </li>
+                <li>
+                    <span class="line">13</span>
+                    str. Vasile Dokuceaev
+                </li>
+                <li>
+                    <span class="line">16</span>
+                    str. 31 August 1989 – str. Uzinelor
+                </li>
+                <li>
+                    <span class="line">21</span>
+                    str. Alba Iulia (șos. Balcani)
+                </li>
+                <li>
+                    <span class="line">23</span>
+                    Parcul „La Izvor”
+                </li>
+                <li>
+                    <span class="line">24</span>
+                    str. Miorița
+                </li>
+                <li>
+                    <span class="line">26</span>
+                    str. Ceucari
+                </li>
+                <li>
+                    <span class="line bus">5</span>
+                    bd. Cuza Vodă
+                </li>
+                <li>
+                    <span class="line bus">23</span>
+                    str. Ismail (bd. Ștefan cel Mare)
+                </li>
+            </ul>
+            <p class="route-note">
+                <i class="fas fa-circle-info"></i>
+                Rutele și stațiile sunt preluate din OpenStreetMap și se pot modifica. Verifică traseul înainte de drum.
+            </p>
+        </section>
+
+        <section id="masina">
+            <div class="section-header">
+                <div class="section-badge">Mașină & taxi</div>
+                <h2>La volan sau cu taxiul</h2>
+                <p>Deschide navigația direct pe club sau dă-i șoferului adresa exactă.</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-car"></i></div>
+                    <h3>Navigație</h3>
+                    <p>Traseul se deschide cu destinația deja setată pe ProGaming Hub.</p>
+                    <div class="card-actions">
+                        <a
+                            class="btn btn-small"
+                            href="https://www.google.com/maps/dir/?api=1&destination=47.0384012,28.8889709"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Google Maps
+                        </a>
+                        <a
+                            class="btn btn-small btn-secondary"
+                            href="https://waze.com/ul?ll=47.0384012,28.8889709&navigate=yes"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Waze
+                        </a>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-taxi"></i></div>
+                    <h3>Taxi</h3>
+                    <p>
+                        Spune-i șoferului:
+                        <strong>Bd Mircea cel Bătrân 3, Ciocana</strong>. Reper în zonă: Pretura sectorului Ciocana.
+                    </p>
+                    <div class="card-actions">
+                        <button
+                            type="button"
+                            class="btn btn-small"
+                            data-copy="Pro Gaming Hub, Bulevardul Mircea cel Bătrân 3, Chișinău MD-2044"
+                        >
+                            <i class="fas fa-copy"></i>
+                            Copiază adresa
+                        </button>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fas fa-phone-alt"></i></div>
+                    <h3>Nu găsești intrarea?</h3>
+                    <p>Sună-ne și te ghidăm până la ușă. Suntem deschiși zilnic, 10:00 – 06:00.</p>
+                    <div class="card-actions">
+                        <a class="btn btn-small" href="tel:076764676">
+                            <i class="fas fa-phone-alt"></i>
+                            076 764 676
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="route-cta">
+            <h2>
+                Ai traseul.
+                <br />
+                Rezervă un loc.
+            </h2>
+            <div class="hero-buttons">
+                <a href="index.html#contact" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i>
+                    Rezervă acum
+                </a>
+                <a href="index.html#preturi" class="btn btn-secondary">
+                    <i class="fas fa-tags"></i>
+                    Vezi prețurile
+                </a>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <img src="images/favicon-192.png" alt="" width="56" height="56" />
+                        <span>ProGaming Hub</span>
+                    </a>
+                    <p>
+                        Club de gaming premium din Chișinău cu PC-uri VIP și console PS5. Experiență de top pentru
+                        gameri pasionați.
+                    </p>
+                    <div class="social-links">
+                        <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://tiktok.com" target="_blank" rel="noopener" aria-label="TikTok">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                        <a href="https://discord.gg" target="_blank" rel="noopener" aria-label="Discord">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Navigare</h4>
+                    <ul>
+                        <li><a href="index.html">Acasă</a></li>
+                        <li><a href="index.html#despre">Despre</a></li>
+                        <li><a href="index.html#preturi">Prețuri</a></li>
+                        <li><a href="index.html#calculator">Calculator</a></li>
+                        <li><a href="index.html#servicii">Servicii</a></li>
+                        <li><a href="index.html#galerie">Galerie</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Cum ajungi</h4>
+                    <ul>
+                        <li><a href="#harta">Hartă</a></li>
+                        <li><a href="#transport">Transport public</a></li>
+                        <li><a href="#masina">Mașină & taxi</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col footer-hours">
+                    <h4>Program & Locație</h4>
+                    <p>
+                        <strong>Luni – Duminică:</strong>
+                        10:00 – 06:00
+                    </p>
+                    <p>
+                        <strong>Pachet noapte:</strong>
+                        23:00 – 06:00
+                    </p>
+                    <p style="margin-top: 12px; color: var(--violet-light); font-size: 0.85rem">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Bd Mircea cel Bătrân 3, Ciocana
+                    </p>
+                    <p style="margin-top: 6px">
+                        <a href="tel:076764676" style="color: var(--violet-light)">
+                            <i class="fas fa-phone-alt"></i>
+                            076 764 676
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 ProGaming Hub. Toate drepturile rezervate.</p>
+            </div>
+        </footer>
+
+        <div class="toast" id="copyToast">
+            <i class="fas fa-check-circle"></i>
+            <span>Adresa a fost copiată.</span>
+        </div>
+
+        <script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
+        <script>
+            window.MAP_STOPS = [
+                { name: 'Str. Ginta Latină', lngLat: [28.8893437, 47.0378918] },
+                { name: 'Bd Mircea cel Bătrân', lngLat: [28.8899577, 47.0373205] },
+                { name: 'Str. Alecu Russo', lngLat: [28.8873672, 47.0372579] },
+            ];
+        </script>
+        <script src="map.js"></script>
+        <script src="script.js"></script>
+    </body>
+</html>

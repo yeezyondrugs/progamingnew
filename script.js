@@ -1,4 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
+    if (location.protocol === 'file:') {
+        document.querySelectorAll('a[href]').forEach((link) => {
+            const href = link.getAttribute('href');
+            if (href === './' || href.startsWith('./#')) {
+                link.setAttribute('href', 'index.html' + href.slice(2));
+            } else if (href === 'cum-ajungi' || href.startsWith('cum-ajungi#')) {
+                link.setAttribute('href', href.replace('cum-ajungi', 'cum-ajungi.html'));
+            }
+        });
+    } else if (location.pathname.endsWith('.html')) {
+        const cleanPath = location.pathname.replace(/(index)?\.html$/, '');
+        history.replaceState(null, '', cleanPath + location.search + location.hash);
+    }
+
     const mobileToggle = document.getElementById('mobileToggle');
     const navLinks = document.getElementById('navLinks');
 

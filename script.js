@@ -88,25 +88,32 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const layoutOffers = () => {
         if (!offers) return;
+        const center = offersSticky.clientWidth / 2;
+        const measureStops = () => {
+            offerStops = offerCards.map((card) =>
+                Math.max(Math.round(card.offsetLeft + card.offsetWidth / 2 - center), 0),
+            );
+            offersDist = offerStops[offerStops.length - 1];
+        };
+        if (motionOff || window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 700) {
+            offersPinned = false;
+            offers.classList.add('no-pin');
+            offers.style.height = '';
+            offersTrack.style.transform = '';
+            measureStops();
+            setOfferShift(offersTrack.scrollLeft);
+            return;
+        }
+
         offers.classList.remove('no-pin');
         offers.style.height = '';
         offersTrack.style.transform = '';
-
-        const center = offersSticky.clientWidth / 2;
-        offerStops = offerCards.map((card) =>
-            Math.max(Math.round(card.offsetLeft + card.offsetWidth / 2 - center), 0),
-        );
-        offersDist = offerStops[offerStops.length - 1];
+        measureStops();
         offersSticky.style.height = 'auto';
         const neededHeight = offersSticky.offsetHeight;
         offersSticky.style.height = '';
 
-        const touchScreen = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 700;
-        offersPinned =
-            !motionOff &&
-            !touchScreen &&
-            offersDist > 0 &&
-            neededHeight <= offersSticky.offsetHeight;
+        offersPinned = offersDist > 0 && neededHeight <= offersSticky.offsetHeight;
         offers.classList.toggle('no-pin', !offersPinned);
         if (offersPinned) offers.style.height = `${offersSticky.offsetHeight + offersDist}px`;
         setOfferShift(offersPinned ? 0 : offersTrack.scrollLeft);
@@ -180,7 +187,10 @@ document.addEventListener('DOMContentLoaded', () => {
             updateOffers();
         });
     };
+    let layoutWidth = 0;
     const onResize = () => {
+        if (window.innerWidth === layoutWidth && offers && offers.classList.contains('no-pin')) return;
+        layoutWidth = window.innerWidth;
         layoutOffers();
         updateOffers();
     };

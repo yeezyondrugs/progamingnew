@@ -11,6 +11,7 @@
     const labelEls = [...section.querySelectorAll('.scene-label')];
     const motionOff = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    const lite = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 700;
     const useStatic = () => section.classList.add('scene-static');
     if (!window.THREE) {
         useStatic();
@@ -19,12 +20,17 @@
 
     let renderer;
     try {
-        renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer = new THREE.WebGLRenderer({
+            canvas,
+            antialias: !lite,
+            alpha: true,
+            powerPreference: 'high-performance',
+        });
     } catch (error) {
         useStatic();
         return;
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.25 : 2));
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.8;
@@ -195,9 +201,10 @@
             depth: 0.012,
             bevelEnabled: false,
         });
-        for (let i = 0; i < 9; i++) {
+        const bladeCount = lite ? 6 : 9;
+        for (let i = 0; i < bladeCount; i++) {
             const pivot = new THREE.Group();
-            pivot.rotation.z = (i / 9) * Math.PI * 2;
+            pivot.rotation.z = (i / bladeCount) * Math.PI * 2;
             const blade = new THREE.Mesh(bladeGeometry, bladeMaterial);
             blade.rotation.x = 0.42;
             pivot.add(blade);
@@ -312,7 +319,10 @@
     addPart('cpu', cpu, [0, 0, 0.3]);
 
     const cooler = new THREE.Group();
-    for (let i = 0; i < 22; i++) cooler.add(box(1.0, 0.018, 0.5, alu, 0, -0.48 + i * 0.046, 0));
+    const finCount = lite ? 8 : 22;
+    for (let i = 0; i < finCount; i++) {
+        cooler.add(box(1.0, 0.018, 0.5, alu, 0, -0.48 + (i * 0.966) / (finCount - 1), 0));
+    }
     cooler.add(slab(1.04, 0.06, 0.54, 0.02, white, 0, 0.52, 0));
     [-0.3, -0.1, 0.1, 0.3].forEach((x) => {
         const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 1.25, 12), copper);
@@ -356,7 +366,9 @@
     const gpu = new THREE.Group();
     gpu.add(slab(3.05, 0.5, 1.4, 0.05, white));
     gpu.add(slab(3.05, 0.05, 1.44, 0.02, alu, 0, 0.29, 0));
-    for (let i = 0; i < 40; i++) gpu.add(box(0.012, 0.3, 1.3, alu, -1.35 + i * 0.07, -0.08, 0));
+    if (!lite) {
+        for (let i = 0; i < 40; i++) gpu.add(box(0.012, 0.3, 1.3, alu, -1.35 + i * 0.07, -0.08, 0));
+    }
     gpu.add(slab(3.05, 0.12, 1.44, 0.04, white, 0, -0.3, 0));
     gpu.add(box(0.06, 1.0, 1.44, steel, -1.56, -0.05, 0));
     gpu.add(box(1.6, 0.14, 0.03, std(0xd9a441, 0.3, 1), -0.5, -0.1, -0.74));
@@ -506,6 +518,8 @@
     let lastTime = 0;
     let activeStep = -2;
     let eased = -1;
+    let skip = false;
+    const styleCache = {};
 
     const resize = () => {
         width = sticky.clientWidth;
@@ -514,10 +528,23 @@
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
         linesSvg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        labels.forEach((label) => {
+            label.w = label.el.offsetWidth;
+            label.h = label.el.offsetHeight;
+        });
+    };
+    const setStyle = (key, value, apply) => {
+        if (styleCache[key] === value) return;
+        styleCache[key] = value;
+        apply(value);
     };
 
     const render = (time) => {
-        const delta = Math.min((time - lastTime) / 1000, 0.05);
+        if (visible) frame = requestAnimationFrame(render);
+        if (document.documentElement.classList.contains('entry-lock')) return;
+        skip = lite && !skip;
+        if (skip) return;
+        const delta = Math.min((time - lastTime) / 1000, 0.07);
         lastTime = time;
 
         const rect = section.getBoundingClientRect();
@@ -547,8 +574,8 @@
         shadow.material.opacity = 1 - explode;
         cameraDrift.z = lerp(0, -0.035, explode);
         camera.rotation.z = cameraDrift.z;
-        sticky.style.setProperty('--bars', explode.toFixed(3));
-        sticky.style.setProperty('--light', (0.35 + rise * 0.65).toFixed(3));
+        setStyle('bars', explode.toFixed(2), (v) => sticky.style.setProperty('--bars', v));
+        setStyle('light', (0.35 + rise * 0.65).toFixed(2), (v) => sticky.style.setProperty('--light', v));
 
         Object.values(parts).forEach((part) => {
             part.group.position
@@ -560,11 +587,17 @@
         renderer.render(scene, camera);
 
         const titleFade = clamp01(progress / 0.14);
-        title.style.opacity = 1 - titleFade;
-        title.style.transform = `translate3d(0, ${-titleFade * 120}px, 0) scale(${1 - titleFade * 0.08})`;
+        setStyle('title', titleFade.toFixed(3), () => {
+            title.style.opacity = 1 - titleFade;
+            title.style.transform = `translate3d(0, ${-titleFade * 120}px, 0) scale(${1 - titleFade * 0.08})`;
+        });
 
-        labels.forEach(({ el, line, part, anchor, side, drop }) => {
-            if (!el.offsetWidth) {
+        setStyle('labels', labelAlpha.toFixed(2), (v) => {
+            linesSvg.style.opacity = v;
+            labels.forEach(({ el }) => (el.style.opacity = v));
+        });
+        if (labelAlpha > 0) labels.forEach(({ el, line, part, anchor, side, drop, w, h }) => {
+            if (!w) {
                 line.style.display = 'none';
                 return;
             }
@@ -574,30 +607,26 @@
             projected.project(camera);
             const x = (projected.x * 0.5 + 0.5) * width;
             const y = (-projected.y * 0.5 + 0.5) * height;
-            const half = el.offsetWidth / 2 + 10;
+            const half = w / 2 + 10;
             const gap = wide ? drop : Math.min(drop, 30);
             const labelX = Math.min(Math.max(x, half), width - half);
             const labelY =
                 side > 0
-                    ? Math.min(y + gap, height - el.offsetHeight - 60)
-                    : Math.max(y - gap - el.offsetHeight, 70);
+                    ? Math.min(y + gap, height - h - 60)
+                    : Math.max(y - gap - h, 70);
             el.style.transform = `translate(${labelX}px, ${labelY}px) translate(-50%, 0)`;
-            el.style.opacity = labelAlpha;
             line.setAttribute('x1', x);
             line.setAttribute('y1', y + side * 4);
             line.setAttribute('x2', labelX);
-            line.setAttribute('y2', side > 0 ? labelY - 4 : labelY + el.offsetHeight + 4);
+            line.setAttribute('y2', side > 0 ? labelY - 4 : labelY + h + 4);
         });
-        linesSvg.style.opacity = labelAlpha;
 
         const step = progress < 0.14 ? -1 : progress < 0.36 ? 0 : progress < 0.74 ? 1 : 2;
         if (step !== activeStep) {
             activeStep = step;
             steps.forEach((el, index) => el.classList.toggle('active', index === step));
         }
-        bar.style.width = `${progress * 100}%`;
-
-        if (visible) frame = requestAnimationFrame(render);
+        setStyle('bar', (progress * 100).toFixed(1), (v) => (bar.style.width = `${v}%`));
     };
 
     if (motionOff) section.classList.add('scene-still');

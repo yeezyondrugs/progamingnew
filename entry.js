@@ -6,6 +6,7 @@
     const enterButton = document.getElementById('entryEnter');
     const skipButton = document.getElementById('entrySkip');
     const motionOff = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const lite = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 700;
 
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     const navigation = performance.getEntriesByType('navigation')[0];
@@ -41,14 +42,18 @@
 
     let renderer;
     try {
-        renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer = new THREE.WebGLRenderer({
+            canvas,
+            antialias: !lite,
+            powerPreference: 'high-performance',
+        });
     } catch (error) {
         close();
         return;
     }
     document.documentElement.classList.add('entry-lock');
     window.scrollTo({ top: 0, behavior: 'instant' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.25 : 2));
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.8;
@@ -288,7 +293,9 @@
         [PURPLE, 0.45, 0, 3.8, -8.5],
         [CYAN, 0.4, -6, 2.5, -6],
         [PINK, 0.4, 6, 2.5, -6],
-    ].forEach(([color, intensity, x, y, z]) => {
+    ]
+        .slice(0, lite ? 2 : 4)
+        .forEach(([color, intensity, x, y, z]) => {
         const light = new THREE.PointLight(color, intensity, 20);
         light.position.set(x, y, z);
         scene.add(light);
@@ -346,7 +353,7 @@
         box(0.8, 0.07, 10.6, deskWood, side * 8.45, 2.35, -6.1);
         neon(0.04, 0.04, 10.6, side > 0 ? PINK : CYAN, side * 8.06, 2.3, -6.1);
 
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 6; i += lite ? 2 : 1) {
             const z = -1.6 - i * 1.7;
             const accent = [CYAN, PINK, PURPLE][(i + (side > 0 ? 1 : 0)) % 3];
 

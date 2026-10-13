@@ -14,452 +14,324 @@
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Unbounded:wght@500;700;800&display=swap"
             rel="stylesheet"
         />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
         <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css" />
-        <link rel="stylesheet" href="style.css?v=3" />
+        <link rel="stylesheet" href="style.css?v=10" />
     </head>
     <body>
-        <div class="bg-effects"></div>
-
         <nav id="navbar">
             <div class="nav-container">
                 <a href="#home" class="logo">
-                    <img src="images/favicon-192.png" alt="" width="48" height="48" />
+                    <img src="images/favicon-192.png" alt="" width="40" height="40" />
                     <span>ProGaming Hub</span>
                 </a>
                 <ul class="nav-links" id="navLinks">
-                    <li><a href="#home">Acasă</a></li>
-                    <li><a href="#despre">Despre</a></li>
-                    <li><a href="#preturi">Prețuri</a></li>
+                    <li><a href="#statie">Stația</a></li>
+                    <li><a href="#preturi">Oferte</a></li>
                     <li><a href="#calculator">Calculator</a></li>
-                    <li><a href="#servicii">Servicii</a></li>
-                    <li><a href="#galerie">Galerie</a></li>
                     <li><a href="#contact">Contact</a></li>
                     <li>
-                        <a href="tel:076764676" class="nav-cta">
-                            <i class="fas fa-phone-alt"></i>
-                            Sună acum
-                        </a>
+                        <a href="tel:076764676" class="nav-cta">Sună acum</a>
                     </li>
                 </ul>
                 <button class="mobile-toggle" id="mobileToggle" aria-label="Meniu"><i class="fas fa-bars"></i></button>
             </div>
         </nav>
 
-        <section class="hero" id="home">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <i class="fas fa-bolt"></i>
-                    Club de Gaming Premium · Chișinău
+        <section class="scene" id="home">
+            <div class="scene-sticky">
+                <div class="scene-title" id="sceneTitle">
+                    <p class="eyebrow">Club de gaming · Ciocana, Chișinău</p>
+                    <h1>
+                        Pro Gaming
+                        <br />
+                        Hub
+                    </h1>
                 </div>
-                <h1>
-                    Joacă la nivel maxim
+                <canvas class="scene-canvas" id="sceneCanvas" aria-hidden="true"></canvas>
+                <svg class="scene-lines" id="sceneLines" aria-hidden="true"></svg>
+                <div class="scene-labels" id="sceneLabels">
+                    <div class="scene-label" data-part="glass">
+                        <span>01</span>
+                        <b>Panou lateral</b>
+                    </div>
+                    <div class="scene-label" data-part="gpu">
+                        <span>02</span>
+                        <b>Placă video</b>
+                        <small>RTX 4060 · RTX 3070 Ti</small>
+                    </div>
+                    <div class="scene-label minor" data-part="cooler">
+                        <span>03</span>
+                        <b>Răcire</b>
+                    </div>
+                    <div class="scene-label" data-part="ram">
+                        <span>04</span>
+                        <b>Memorie</b>
+                        <small>32 GB RAM</small>
+                    </div>
+                    <div class="scene-label minor" data-part="cpu">
+                        <span>05</span>
+                        <b>Procesor</b>
+                        <small>Intel i5 · i7</small>
+                    </div>
+                    <div class="scene-label minor" data-part="mobo">
+                        <span>06</span>
+                        <b>Placă de bază</b>
+                    </div>
+                    <div class="scene-label minor" data-part="psu">
+                        <span>07</span>
+                        <b>Sursă</b>
+                    </div>
+                    <div class="scene-label minor" data-part="fans">
+                        <span>08</span>
+                        <b>Ventilație</b>
+                    </div>
+                    <div class="scene-label" data-part="chassis">
+                        <span>09</span>
+                        <b>Carcasă</b>
+                    </div>
+                </div>
+
+                <div class="scene-copy">
+                    <p class="scene-step" data-step="0">Stația VIP — construită pentru joc</p>
+                    <p class="scene-step" data-step="1">Piesă cu piesă</p>
+                    <p class="scene-step" data-step="2">Tot ce e înăuntru</p>
+                </div>
+                <p class="scene-hint">Derulează</p>
+                <div class="scene-progress"><span id="sceneBar"></span></div>
+            </div>
+        </section>
+
+        <section class="statement" id="statie">
+            <div class="statement-text">
+                <p class="eyebrow">Stația VIP</p>
+                <h2>
+                    Hardware serios,
                     <br />
-                    PC VIP & PS5
-                </h1>
+                    fără compromisuri.
+                </h2>
                 <p>
-                    Experiență de gaming de top cu hardware de ultimă generație, monitoare high-refresh și console
-                    PlayStation 5.
+                    Stații PC cu RTX 4060 și RTX 3070 Ti, 32 GB RAM și monitoare de 180–280 Hz, plus console PlayStation
+                    5 gata de joc. Periferice Razer, AJAZZ și ATTACK SHARK la fiecare loc.
                 </p>
-                <div class="hero-buttons">
-                    <a href="#preturi" class="btn btn-primary">
-                        <i class="fas fa-tags"></i>
-                        Vezi prețurile
-                    </a>
-                    <a href="tel:076764676" class="btn btn-secondary">
-                        <i class="fas fa-phone-alt"></i>
-                        076 764 676
-                    </a>
-                </div>
-                <div class="hero-stats">
-                    <div class="stat">
-                        <div class="stat-number">20+</div>
-                        <div class="stat-label">Stații PC VIP</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">8</div>
-                        <div class="stat-label">Console PS5</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">180Hz+</div>
-                        <div class="stat-label">Monitoare</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">23–06</div>
-                        <div class="stat-label">Pachete noapte</div>
-                    </div>
-                </div>
+                <a href="#preturi" class="btn">Vezi ofertele</a>
             </div>
+            <ul class="statement-stats">
+                <li>
+                    <strong>20+</strong>
+                    <span>stații PC VIP</span>
+                </li>
+                <li>
+                    <strong>8</strong>
+                    <span>console PS5</span>
+                </li>
+                <li>
+                    <strong>280 Hz</strong>
+                    <span>refresh maxim la monitoare</span>
+                </li>
+                <li>
+                    <strong>10–06</strong>
+                    <span>deschis zilnic</span>
+                </li>
+            </ul>
         </section>
 
-        <section id="despre">
-            <div class="section-header">
-                <div class="section-badge">Despre noi</div>
-                <h2>De ce ProGaming Hub?</h2>
-                <p>
-                    Un spațiu dedicat gamerilor pasionați, cu echipamente premium și o comunitate prietenoasă în
-                    Ciocana.
-                </p>
-            </div>
-            <div class="about-grid">
-                <div class="about-content">
-                    <h3>Clubul tău de gaming din Chișinău</h3>
-                    <p>
-                        ProGaming Hub este locul unde performanța întâlnește confortul. Oferim stații PC de top cu RTX
-                        4060 și 3070/3070 Ti, monitoare Samsung Odyssey și AOC high-refresh, plus console PlayStation 5
-                        gata de joc.
-                    </p>
-                    <p>
-                        Indiferent dacă vrei să te antrenezi pentru competitive, să joci cu prietenii sau să te relaxezi
-                        pe PS5 — la noi găsești exact ce ai nevoie.
-                    </p>
-                    <ul class="features-list">
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            Hardware de ultimă generație (RTX 4060 / 3070 Ti)
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            Monitoare 180–280 Hz pentru competitive
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            Periferice Razer, AJAZZ, ATTACK SHARK
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            Console PS5 cu jocuri populare
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            Pachete de noapte avantajoase
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            Ambient curat, răcorit și bine iluminat
-                        </li>
-                    </ul>
-                </div>
-                <div class="about-cards">
-                    <div class="about-card">
-                        <i class="fas fa-desktop"></i>
-                        <h4>VIP PC</h4>
-                        <p>RTX 4060 · 32GB · 180Hz</p>
+        <section class="offers" id="preturi">
+            <div class="offers-sticky">
+                <div class="offers-track" id="offersTrack">
+                    <div class="offers-intro">
+                        <p class="eyebrow">Oferte</p>
+                        <h2>
+                            Alege
+                            <br />
+                            oferta
+                        </h2>
+                        <p>Prețuri mai mici de luni până joi. Derulează mai departe.</p>
                     </div>
-                    <div class="about-card">
-                        <i class="fas fa-rocket"></i>
-                        <h4>VIP PC+</h4>
-                        <p>RTX 3070/Ti · i7 · 200–280Hz</p>
-                    </div>
-                    <div class="about-card">
-                        <i class="fab fa-playstation"></i>
-                        <h4>PlayStation 5</h4>
-                        <p>Console dedicate + jocuri</p>
-                    </div>
-                    <div class="about-card">
-                        <i class="fas fa-moon"></i>
-                        <h4>Noapte</h4>
-                        <p>23:00 – 06:00 pachete speciale</p>
-                    </div>
-                </div>
-            </div>
-        </section>
 
-        <section id="preturi">
-            <div class="section-header">
-                <div class="section-badge">Prețuri</div>
-                <h2>Tarife transparente</h2>
-                <p>Alege tipul de stație și perioada. Prețuri mai mici de luni până joi.</p>
-            </div>
-            <div class="price-tabs">
-                <button class="price-tab active" data-tab="vip-pc">VIP PC</button>
-                <button class="price-tab" data-tab="vip-pc-plus">VIP PC+</button>
-                <button class="price-tab" data-tab="ps5">PlayStation 5</button>
-            </div>
+                    <article class="offer" data-tilt="-5">
+                        <p class="offer-num">01</p>
+                        <h3>VIP PC+</h3>
+                        <p class="offer-spec">RTX 3070 / 3070 Ti · Intel i5-14th / i7 · 27” 200–280 Hz</p>
+                        <p class="offer-from">
+                            de la
+                            <strong>35</strong>
+                            lei / oră
+                        </p>
+                        <table class="offer-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Luni–Joi</th>
+                                    <th>Vin–Dum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1 oră</td>
+                                    <td>35</td>
+                                    <td>40</td>
+                                </tr>
+                                <tr>
+                                    <td>3 ore</td>
+                                    <td>90</td>
+                                    <td>105</td>
+                                </tr>
+                                <tr>
+                                    <td>6 ore</td>
+                                    <td>140</td>
+                                    <td>160</td>
+                                </tr>
+                                <tr>
+                                    <td>Noapte</td>
+                                    <td>140</td>
+                                    <td>160</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </article>
 
-            <div class="price-content active" id="vip-pc">
-                <div class="price-specs">
-                    <h3>
-                        <i class="fas fa-desktop"></i>
-                        VIP PC
-                    </h3>
-                    <div class="specs-grid">
-                        <div class="spec-item">
-                            <i class="fas fa-microchip"></i>
-                            RTX 4060
-                        </div>
-                        <div class="spec-item">
-                            <i class="fas fa-memory"></i>
-                            32 GB RAM
-                        </div>
-                        <div class="spec-item">
-                            <i class="fas fa-server"></i>
-                            Intel i5-12th
-                        </div>
-                        <div class="spec-item">
-                            <i class="fas fa-tv"></i>
-                            27” Samsung Odyssey 180 Hz
-                        </div>
-                        <div class="spec-item">
-                            <i class="fas fa-mouse"></i>
-                            Razer Basilisk V3 / Cobra / AJAZZ
-                        </div>
-                        <div class="spec-item">
-                            <i class="fas fa-headphones"></i>
-                            Razer Blackshark V2
-                        </div>
+                    <article class="offer" data-tilt="4">
+                        <p class="offer-num">02</p>
+                        <h3>VIP PC</h3>
+                        <p class="offer-spec">RTX 4060 · Intel i5-12th · 27” Samsung Odyssey 180 Hz</p>
+                        <p class="offer-from">
+                            de la
+                            <strong>25</strong>
+                            lei / oră
+                        </p>
+                        <table class="offer-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Luni–Joi</th>
+                                    <th>Vin–Dum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1 oră</td>
+                                    <td>25</td>
+                                    <td>30</td>
+                                </tr>
+                                <tr>
+                                    <td>3 ore</td>
+                                    <td>60</td>
+                                    <td>75</td>
+                                </tr>
+                                <tr>
+                                    <td>6 ore</td>
+                                    <td>100</td>
+                                    <td>120</td>
+                                </tr>
+                                <tr>
+                                    <td>Noapte</td>
+                                    <td>100</td>
+                                    <td>120</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </article>
+
+                    <article class="offer" data-tilt="-3">
+                        <p class="offer-num">03</p>
+                        <h3>PlayStation 5</h3>
+                        <p class="offer-spec">Console PS5 oficiale · ecrane 4K · controllere DualSense</p>
+                        <p class="offer-from">
+                            de la
+                            <strong>50</strong>
+                            lei / oră
+                        </p>
+                        <table class="offer-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Luni–Joi</th>
+                                    <th>Vin–Dum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1 oră</td>
+                                    <td>50</td>
+                                    <td>60</td>
+                                </tr>
+                                <tr>
+                                    <td>3 ore</td>
+                                    <td>120</td>
+                                    <td>150</td>
+                                </tr>
+                                <tr>
+                                    <td>6 ore</td>
+                                    <td>200</td>
+                                    <td>200</td>
+                                </tr>
+                                <tr>
+                                    <td>Noapte</td>
+                                    <td>200</td>
+                                    <td>200</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </article>
+
+                    <article class="offer offer-dark" data-tilt="5">
+                        <p class="offer-num">04</p>
+                        <h3>Pachet de noapte</h3>
+                        <p class="offer-spec">23:00 – 06:00 · șapte ore la preț fix</p>
+                        <p class="offer-from">
+                            de la
+                            <strong>100</strong>
+                            lei / noapte
+                        </p>
+                        <table class="offer-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Luni–Joi</th>
+                                    <th>Vin–Dum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>VIP PC</td>
+                                    <td>100</td>
+                                    <td>120</td>
+                                </tr>
+                                <tr>
+                                    <td>VIP PC+</td>
+                                    <td>140</td>
+                                    <td>160</td>
+                                </tr>
+                                <tr>
+                                    <td>PS5</td>
+                                    <td>200</td>
+                                    <td>200</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </article>
+
+                    <div class="offers-outro">
+                        <h2>
+                            Loc liber
+                            <br />
+                            pentru tine?
+                        </h2>
+                        <a href="#contact" class="btn">Rezervă acum</a>
                     </div>
                 </div>
-                <div class="price-tables">
-                    <div class="price-table">
-                        <div class="price-table-header">
-                            <h4>
-                                <i class="fas fa-calendar-week"></i>
-                                Luni – Joi
-                            </h4>
-                        </div>
-                        <div class="price-table-body">
-                            <div class="price-row">
-                                <span class="duration">1 oră</span>
-                                <span class="price">25 lei</span>
-                            </div>
-                            <div class="price-row">
-                                <span class="duration">3 ore</span>
-                                <span class="price">60 lei</span>
-                            </div>
-                            <div class="price-row">
-                                <span class="duration">6 ore</span>
-                                <span class="price">100 lei</span>
-                            </div>
-                            <div class="price-row night-package">
-                                <span class="duration">
-                                    Pachet de noapte
-                                    <span class="night-badge">23:00–06:00</span>
-                                </span>
-                                <span class="price">100 lei</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="price-table">
-                        <div class="price-table-header">
-                            <h4>
-                                <i class="fas fa-calendar"></i>
-                                Vineri – Duminică
-                            </h4>
-                        </div>
-                        <div class="price-table-body">
-                            <div class="price-row">
-                                <span class="duration">1 oră</span>
-                                <span class="price">30 lei</span>
-                            </div>
-                            <div class="price-row">
-                                <span class="duration">3 ore</span>
-                                <span class="price">75 lei</span>
-                            </div>
-                            <div class="price-row">
-                                <span class="duration">6 ore</span>
-                                <span class="price">120 lei</span>
-                            </div>
-                            <div class="price-row night-package">
-                                <span class="duration">
-                                    Pachet de noapte
-                                    <span class="night-badge">23:00–06:00</span>
-                                </span>
-                                <span class="price">120 lei</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="price-content" id="vip-pc-plus">
-                <div class="price-specs">
-                    <h3>
-                        <i class="fas fa-rocket"></i>
-                        VIP PC+
-                    </h3>
-                    <div class="specs-grid">
-                        <div class="spec-item">
-                            <i class="fas fa-microchip"></i>
-                            RTX 3070 / 3070 Ti
-                        </div>
-                        <div class="spec-item">
-                            <i class="fas fa-memory"></i>
-                            32 GB RAM
-                        </div>
-                        <div class="spec-item">
-                            <i class="fas fa-server"></i>
-                            Intel i5-14th / i7
-                        </div>
-                        <div class="spec-item">
-                            <i class="fas fa-tv"></i>
-                            27” AOC 200–280 Hz
-                        </div>
-                        <div class="spec-item">
-                            <i class="fas fa-mouse"></i>
-                            Razer Cobra / ATTACK SHARK / AULA F75
-                        </div>
-                        <div class="spec-item">
-                            <i class="fas fa-headphones"></i>
-                            Razer Blackshark V2
-                        </div>
-                    </div>
-                </div>
-                <div class="price-tables">
-                    <div class="price-table">
-                        <div class="price-table-header">
-                            <h4>
-                                <i class="fas fa-calendar-week"></i>
-                                Luni – Joi
-                            </h4>
-                        </div>
-                        <div class="price-table-body">
-                            <div class="price-row">
-                                <span class="duration">1 oră</span>
-                                <span class="price">35 lei</span>
-                            </div>
-                            <div class="price-row">
-                                <span class="duration">3 ore</span>
-                                <span class="price">90 lei</span>
-                            </div>
-                            <div class="price-row">
-                                <span class="duration">6 ore</span>
-                                <span class="price">140 lei</span>
-                            </div>
-                            <div class="price-row night-package">
-                                <span class="duration">
-                                    Pachet de noapte
-                                    <span class="night-badge">23:00–06:00</span>
-                                </span>
-                                <span class="price">140 lei</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="price-table">
-                        <div class="price-table-header">
-                            <h4>
-                                <i class="fas fa-calendar"></i>
-                                Vineri – Duminică
-                            </h4>
-                        </div>
-                        <div class="price-table-body">
-                            <div class="price-row">
-                                <span class="duration">1 oră</span>
-                                <span class="price">40 lei</span>
-                            </div>
-                            <div class="price-row">
-                                <span class="duration">3 ore</span>
-                                <span class="price">105 lei</span>
-                            </div>
-                            <div class="price-row">
-                                <span class="duration">6 ore</span>
-                                <span class="price">160 lei</span>
-                            </div>
-                            <div class="price-row night-package">
-                                <span class="duration">
-                                    Pachet de noapte
-                                    <span class="night-badge">23:00–06:00</span>
-                                </span>
-                                <span class="price">160 lei</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="price-content" id="ps5">
-                <div class="price-specs">
-                    <h3>
-                        <i class="fab fa-playstation"></i>
-                        PlayStation 5
-                    </h3>
-                    <div class="specs-grid">
-                        <div class="spec-item">
-                            <i class="fas fa-gamepad"></i>
-                            Console PS5 oficiale
-                        </div>
-                        <div class="spec-item">
-                            <i class="fas fa-tv"></i>
-                            Ecrane dedicate 4K
-                        </div>
-                        <div class="spec-item">
-                            <i class="fas fa-headset"></i>
-                            Controllere DualSense
-                        </div>
-                        <div class="spec-item">
-                            <i class="fas fa-compact-disc"></i>
-                            Jocuri populare incluse
-                        </div>
-                    </div>
-                </div>
-                <div class="price-tables">
-                    <div class="price-table">
-                        <div class="price-table-header">
-                            <h4>
-                                <i class="fas fa-calendar-week"></i>
-                                Luni – Joi
-                            </h4>
-                        </div>
-                        <div class="price-table-body">
-                            <div class="price-row">
-                                <span class="duration">1 oră</span>
-                                <span class="price">50 lei</span>
-                            </div>
-                            <div class="price-row">
-                                <span class="duration">3 ore</span>
-                                <span class="price">120 lei</span>
-                            </div>
-                            <div class="price-row">
-                                <span class="duration">6 ore</span>
-                                <span class="price">200 lei</span>
-                            </div>
-                            <div class="price-row night-package">
-                                <span class="duration">
-                                    Pachet de noapte
-                                    <span class="night-badge">23:00–06:00</span>
-                                </span>
-                                <span class="price">200 lei</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="price-table">
-                        <div class="price-table-header">
-                            <h4>
-                                <i class="fas fa-calendar"></i>
-                                Vineri – Duminică
-                            </h4>
-                        </div>
-                        <div class="price-table-body">
-                            <div class="price-row">
-                                <span class="duration">1 oră</span>
-                                <span class="price">60 lei</span>
-                            </div>
-                            <div class="price-row">
-                                <span class="duration">3 ore</span>
-                                <span class="price">150 lei</span>
-                            </div>
-                            <div class="price-row">
-                                <span class="duration">6 ore</span>
-                                <span class="price">200 lei</span>
-                            </div>
-                            <div class="price-row night-package">
-                                <span class="duration">
-                                    Pachet de noapte
-                                    <span class="night-badge">23:00–06:00</span>
-                                </span>
-                                <span class="price">200 lei</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="offers-progress"><span id="offersBar"></span></div>
             </div>
         </section>
 
         <section id="calculator">
             <div class="section-header">
                 <div class="section-badge">Estimare rapidă</div>
-                <h2>Calculează prețul sesiunii tale.</h2>
+                <h2>Calculează costul sesiunii</h2>
                 <p>Alege echipamentul, ziua și durata — vezi imediat cât costă.</p>
             </div>
 
@@ -468,13 +340,7 @@
                     <div class="calc-group" role="group" aria-labelledby="calcL1">
                         <span class="calc-label" id="calcL1">Echipament</span>
                         <div class="calc-options">
-                            <button
-                                type="button"
-                                class="calc-opt"
-                                data-group="type"
-                                data-value="vip"
-                                aria-pressed="true"
-                            >
+                            <button type="button" class="calc-opt" data-group="type" data-value="vip" aria-pressed="true">
                                 VIP PC
                             </button>
                             <button
@@ -486,13 +352,7 @@
                             >
                                 VIP PC+
                             </button>
-                            <button
-                                type="button"
-                                class="calc-opt"
-                                data-group="type"
-                                data-value="ps5"
-                                aria-pressed="false"
-                            >
+                            <button type="button" class="calc-opt" data-group="type" data-value="ps5" aria-pressed="false">
                                 PS5
                             </button>
                         </div>
@@ -501,13 +361,7 @@
                     <div class="calc-group" role="group" aria-labelledby="calcL2">
                         <span class="calc-label" id="calcL2">Zi</span>
                         <div class="calc-options">
-                            <button
-                                type="button"
-                                class="calc-opt"
-                                data-group="day"
-                                data-value="week"
-                                aria-pressed="true"
-                            >
+                            <button type="button" class="calc-opt" data-group="day" data-value="week" aria-pressed="true">
                                 Luni – Joi
                             </button>
                             <button
@@ -528,34 +382,16 @@
                             <button type="button" class="calc-opt" data-group="dur" data-value="1h" aria-pressed="true">
                                 1 oră
                             </button>
-                            <button
-                                type="button"
-                                class="calc-opt"
-                                data-group="dur"
-                                data-value="3h"
-                                aria-pressed="false"
-                            >
+                            <button type="button" class="calc-opt" data-group="dur" data-value="3h" aria-pressed="false">
                                 3 ore
                             </button>
-                            <button
-                                type="button"
-                                class="calc-opt"
-                                data-group="dur"
-                                data-value="6h"
-                                aria-pressed="false"
-                            >
+                            <button type="button" class="calc-opt" data-group="dur" data-value="6h" aria-pressed="false">
                                 6 ore
                             </button>
-                            <button
-                                type="button"
-                                class="calc-opt"
-                                data-group="dur"
-                                data-value="night"
-                                aria-pressed="false"
-                            >
+                            <button type="button" class="calc-opt" data-group="dur" data-value="night" aria-pressed="false">
                                 Noapte
                                 <br />
-                                <small>23:00–6:00</small>
+                                <small>23:00–06:00</small>
                             </button>
                         </div>
                     </div>
@@ -568,7 +404,7 @@
                         <small>lei</small>
                     </div>
                     <p class="calc-summary" id="calcSummary">1 oră · VIP PC · Luni–Joi</p>
-                    <a href="#contact" class="btn">
+                    <a href="#contact" class="btn" id="calcReserve">
                         Rezervă acum
                         <i class="fas fa-arrow-right"></i>
                     </a>
@@ -610,42 +446,8 @@
                 </div>
                 <div class="service-card">
                     <div class="service-icon"><i class="fas fa-shield-alt"></i></div>
-                    <h3>Securitate & curățenie</h3>
+                    <h3>Curat & sigur</h3>
                     <p>Spațiu monitorizat, curat și întreținut constant pentru siguranța ta.</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="galerie">
-            <div class="section-header">
-                <div class="section-badge">Galerie</div>
-                <h2>Atmosfera din club</h2>
-                <p>O privire asupra stațiilor noastre VIP și zonei PS5.</p>
-            </div>
-            <div class="gallery-grid">
-                <div class="gallery-item">
-                    <i class="fas fa-desktop"></i>
-                    <span>Stații VIP PC</span>
-                </div>
-                <div class="gallery-item">
-                    <i class="fas fa-rocket"></i>
-                    <span>VIP PC+ High Refresh</span>
-                </div>
-                <div class="gallery-item">
-                    <i class="fab fa-playstation"></i>
-                    <span>Zone PlayStation 5</span>
-                </div>
-                <div class="gallery-item">
-                    <i class="fas fa-users"></i>
-                    <span>Zone de echipă</span>
-                </div>
-                <div class="gallery-item">
-                    <i class="fas fa-moon"></i>
-                    <span>Ambient de noapte</span>
-                </div>
-                <div class="gallery-item">
-                    <i class="fas fa-headset"></i>
-                    <span>Periferice premium</span>
                 </div>
             </div>
         </section>
@@ -653,12 +455,12 @@
         <section id="contact">
             <div class="section-header">
                 <div class="section-badge">Contact</div>
-                <h2>Rezervă sau sună-ne</h2>
+                <h2>Rezervă un loc</h2>
                 <p>Completează formularul sau sună direct. Răspundem rapid.</p>
             </div>
             <div class="contact-grid">
                 <div class="contact-info">
-                    <h3>Informații de contact</h3>
+                    <h3>Date de contact</h3>
                     <div class="contact-item">
                         <i class="fas fa-map-marker-alt"></i>
                         <div>
@@ -695,7 +497,7 @@
                             <p>
                                 Luni – Duminică: 10:00 – 06:00
                                 <br />
-                                <small style="color: var(--violet-light)">Pachete de noapte 23:00 – 06:00</small>
+                                <small>Pachete de noapte 23:00 – 06:00</small>
                             </p>
                         </div>
                     </div>
@@ -746,7 +548,7 @@
                                 placeholder="Detalii suplimentare, număr de persoane etc."
                             ></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center">
+                        <button type="submit" class="btn btn-primary btn-block">
                             <i class="fas fa-paper-plane"></i>
                             Trimite rezervarea
                         </button>
@@ -782,10 +584,7 @@
                         <img src="images/favicon-192.png" alt="" width="56" height="56" />
                         <span>ProGaming Hub</span>
                     </a>
-                    <p>
-                        Club de gaming premium din Chișinău cu PC-uri VIP și console PS5. Experiență de top pentru
-                        gameri pasionați.
-                    </p>
+                    <p>Club de gaming premium din Chișinău cu PC-uri VIP și console PS5.</p>
                     <div class="social-links">
                         <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook">
                             <i class="fab fa-facebook-f"></i>
@@ -805,23 +604,12 @@
                     <h4>Navigare</h4>
                     <ul>
                         <li><a href="#home">Acasă</a></li>
-                        <li><a href="#despre">Despre</a></li>
+                        <li><a href="#statie">Stația</a></li>
                         <li><a href="#preturi">Prețuri</a></li>
                         <li><a href="#calculator">Calculator</a></li>
                         <li><a href="#servicii">Servicii</a></li>
-                        <li><a href="#galerie">Galerie</a></li>
                         <li><a href="#contact">Contact</a></li>
                         <li><a href="cum-ajungi">Cum ajungi</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Stații</h4>
-                    <ul>
-                        <li><a href="#preturi">VIP PC</a></li>
-                        <li><a href="#preturi">VIP PC+</a></li>
-                        <li><a href="#preturi">PlayStation 5</a></li>
-                        <li><a href="#calculator">Calculator preț</a></li>
-                        <li><a href="#preturi">Pachete de noapte</a></li>
                     </ul>
                 </div>
                 <div class="footer-col footer-hours">
@@ -834,12 +622,12 @@
                         <strong>Pachet noapte:</strong>
                         23:00 – 06:00
                     </p>
-                    <p style="margin-top: 12px; color: var(--violet-light); font-size: 0.85rem">
+                    <p>
                         <i class="fas fa-map-marker-alt"></i>
                         Bd Mircea cel Bătrân 3, Ciocana
                     </p>
-                    <p style="margin-top: 6px">
-                        <a href="tel:076764676" style="color: var(--violet-light)">
+                    <p>
+                        <a href="tel:076764676">
                             <i class="fas fa-phone-alt"></i>
                             076 764 676
                         </a>
@@ -861,7 +649,9 @@
         </div>
 
         <script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
-        <script src="map.js?v=3"></script>
-        <script src="script.js?v=4"></script>
+        <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
+        <script src="map.js?v=10"></script>
+        <script src="scene.js?v=10"></script>
+        <script src="script.js?v=10"></script>
     </body>
 </html>

@@ -13,48 +13,101 @@ document.addEventListener('DOMContentLoaded', () => {
         history.replaceState(null, '', cleanPath + location.search + location.hash);
     }
 
+    const motionOff = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const clamp01 = (value) => Math.min(Math.max(value, 0), 1);
+
     const mobileToggle = document.getElementById('mobileToggle');
     const navLinks = document.getElementById('navLinks');
-
     if (mobileToggle && navLinks) {
-        mobileToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('open');
-            const icon = mobileToggle.querySelector('i');
-            icon.classList.toggle('fa-bars');
-            icon.classList.toggle('fa-times');
-        });
-
+        const icon = mobileToggle.querySelector('i');
+        const setMenu = (open) => {
+            navLinks.classList.toggle('open', open);
+            icon.classList.toggle('fa-bars', !open);
+            icon.classList.toggle('fa-times', open);
+        };
+        mobileToggle.addEventListener('click', () => setMenu(!navLinks.classList.contains('open')));
         navLinks.querySelectorAll('a').forEach((link) => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('open');
-                const icon = mobileToggle.querySelector('i');
-                icon.classList.add('fa-bars');
-                icon.classList.remove('fa-times');
-            });
+            link.addEventListener('click', () => setMenu(false));
         });
     }
 
     const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 40) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-    });
+    const updateNavbar = () => navbar.classList.toggle('scrolled', window.scrollY > 40);
 
-    const tabs = document.querySelectorAll('.price-tab');
-    const contents = document.querySelectorAll('.price-content');
+    const offers = document.querySelector('.offers');
+    const offersTrack = document.getElementById('offersTrack');
+    const offersBar = document.getElementById('offersBar');
+    const offersSticky = offers ? offers.querySelector('.offers-sticky') : null;
+    const offerItems = offersTrack ? [...offersTrack.children] : [];
+    const offerCards = offerItems.filter((item) => item.classList.contains('offer'));
+    let offersDist = 0;
+    let offersPinned = false;
 
-    tabs.forEach((tab) => {
-        tab.addEventListener('click', () => {
-            tabs.forEach((t) => t.classList.remove('active'));
-            contents.forEach((c) => c.classList.remove('active'));
-            tab.classList.add('active');
-            const target = document.getElementById(tab.dataset.tab);
-            if (target) target.classList.add('active');
+    const tiltCards = (shift) => {
+        const center = offersSticky.clientWidth / 2;
+        offerCards.forEach((card) => {
+            const tilt = Number(card.dataset.tilt);
+            const distance = (card.offsetLeft + card.offsetWidth / 2 - shift - center) / center;
+            const amount = motionOff ? 0 : Math.min(Math.abs(distance), 1);
+            card.style.transform = `translateY(${amount * Math.sign(tilt) * 26}px) rotate(${tilt * amount}deg)`;
         });
-    });
+    };
+    const layoutOffers = () => {
+        if (!offers) return;
+        offers.classList.remove('no-pin');
+        offers.style.height = '';
+        offersTrack.style.transform = '';
+
+        const first = offerItems[0];
+        const last = offerItems[offerItems.length - 1];
+        offersDist = Math.max(
+            last.offsetLeft + last.offsetWidth + first.offsetLeft - offersSticky.clientWidth,
+            0,
+        );
+        offersSticky.style.height = 'auto';
+        const neededHeight = offersSticky.offsetHeight;
+        offersSticky.style.height = '';
+
+        offersPinned = !motionOff && offersDist > 0 && neededHeight <= offersSticky.offsetHeight;
+        offers.classList.toggle('no-pin', !offersPinned);
+        if (offersPinned) offers.style.height = `${offersSticky.offsetHeight + offersDist}px`;
+        else tiltCards(offersTrack.scrollLeft);
+    };
+    const updateOffers = () => {
+        if (!offers || !offersPinned) return;
+        const progress = clamp01(-offers.getBoundingClientRect().top / offersDist);
+        offersTrack.style.transform = `translate3d(${-progress * offersDist}px, 0, 0)`;
+        offersBar.style.width = `${progress * 100}%`;
+        tiltCards(progress * offersDist);
+    };
+    if (offers) {
+        offersTrack.addEventListener('scroll', () => {
+            if (offersPinned) return;
+            const max = offersTrack.scrollWidth - offersTrack.clientWidth;
+            offersBar.style.width = `${max > 0 ? (offersTrack.scrollLeft / max) * 100 : 0}%`;
+            tiltCards(offersTrack.scrollLeft);
+        });
+    }
+
+    let scrollTicking = false;
+    const onScroll = () => {
+        if (scrollTicking) return;
+        scrollTicking = true;
+        requestAnimationFrame(() => {
+            scrollTicking = false;
+            updateNavbar();
+            updateOffers();
+        });
+    };
+    const onResize = () => {
+        layoutOffers();
+        updateOffers();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onResize);
+    window.addEventListener('load', onResize);
+    updateNavbar();
+    onResize();
 
     const calc = document.getElementById('calc');
     if (calc) {
@@ -75,64 +128,72 @@ document.addEventListener('DOMContentLoaded', () => {
         const NAMES = { vip: 'VIP PC', vipplus: 'VIP PC+', ps5: 'PS5' };
         const DAYS = { week: 'Luni–Joi', weekend: 'Vineri–Duminică' };
         const DURS = { '1h': '1 oră', '3h': '3 ore', '6h': '6 ore', night: 'Noapte 23:00–06:00' };
+        const FORM_TYPES = { vip: 'vip-pc', vipplus: 'vip-pc-plus', ps5: 'ps5' };
         const state = { type: 'vip', day: 'week', dur: '1h' };
 
         const valueEl = document.getElementById('calcValue');
         const priceEl = document.getElementById('calcPrice');
         const summaryEl = document.getElementById('calcSummary');
-
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         let shown = Number(valueEl.textContent);
         let raf;
 
         const animateValue = (to) => {
             cancelAnimationFrame(raf);
-            if (reduceMotion) {
+            if (motionOff) {
                 shown = to;
                 valueEl.textContent = to;
                 return;
             }
             const from = shown;
             const start = performance.now();
-            const duration = 350;
             const tick = (now) => {
-                const t = Math.min((now - start) / duration, 1);
-                const eased = 1 - Math.pow(1 - t, 3);
-                shown = Math.round(from + (to - from) * eased);
+                const t = Math.min((now - start) / 350, 1);
+                shown = Math.round(from + (to - from) * (1 - Math.pow(1 - t, 3)));
                 valueEl.textContent = shown;
                 if (t < 1) raf = requestAnimationFrame(tick);
             };
             raf = requestAnimationFrame(tick);
         };
 
-        const renderCalc = () => {
+        calc.addEventListener('click', (event) => {
+            const button = event.target.closest('.calc-opt');
+            if (!button) return;
+            state[button.dataset.group] = button.dataset.value;
+            calc.querySelectorAll(`.calc-opt[data-group="${button.dataset.group}"]`).forEach((other) => {
+                other.setAttribute('aria-pressed', other === button ? 'true' : 'false');
+            });
             animateValue(PRICES[state.type][state.day][state.dur]);
             summaryEl.textContent = `${DURS[state.dur]} · ${NAMES[state.type]} · ${DAYS[state.day]}`;
             priceEl.classList.remove('pop');
             void priceEl.offsetWidth;
             priceEl.classList.add('pop');
-        };
-
-        calc.addEventListener('click', (e) => {
-            const btn = e.target.closest('.calc-opt');
-            if (!btn) return;
-            state[btn.dataset.group] = btn.dataset.value;
-            calc.querySelectorAll(`.calc-opt[data-group="${btn.dataset.group}"]`).forEach((b) => {
-                b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
-            });
-            renderCalc();
         });
 
-        const FORM_TYPES = { vip: 'vip-pc', vipplus: 'vip-pc-plus', ps5: 'ps5' };
-        const reserveBtn = calc.querySelector('.calc-result .btn');
-        if (reserveBtn) {
-            reserveBtn.addEventListener('click', () => {
-                const typeSelect = document.getElementById('type');
-                const durSelect = document.getElementById('duration');
-                if (typeSelect) typeSelect.value = FORM_TYPES[state.type];
-                if (durSelect) durSelect.value = state.dur;
-            });
-        }
+        document.getElementById('calcReserve').addEventListener('click', () => {
+            document.getElementById('type').value = FORM_TYPES[state.type];
+            document.getElementById('duration').value = state.dur;
+        });
+    }
+
+    const revealTargets = document.querySelectorAll(
+        '.statement-text, .statement-stats li, .section-header, .calc, .service-card, .contact-info, .contact-form, .stop-card, .hero-content',
+    );
+    if (!motionOff && 'IntersectionObserver' in window) {
+        const revealObserver = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) return;
+                    entry.target.classList.add('in');
+                    revealObserver.unobserve(entry.target);
+                });
+            },
+            { threshold: 0.15 },
+        );
+        revealTargets.forEach((target, index) => {
+            target.classList.add('reveal');
+            target.style.transitionDelay = `${(index % 3) * 90}ms`;
+            revealObserver.observe(target);
+        });
     }
 
     const mapFab = document.getElementById('mapFab');
@@ -146,36 +207,33 @@ document.addEventListener('DOMContentLoaded', () => {
         ).observe(mapSection);
     }
 
+    const showToast = (toast, duration) => {
+        if (!toast) return;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), duration);
+    };
+
     const copyToast = document.getElementById('copyToast');
-    document.querySelectorAll('[data-copy]').forEach((btn) => {
-        btn.addEventListener('click', async () => {
+    document.querySelectorAll('[data-copy]').forEach((button) => {
+        button.addEventListener('click', async () => {
             try {
-                await navigator.clipboard.writeText(btn.dataset.copy);
+                await navigator.clipboard.writeText(button.dataset.copy);
             } catch {
                 return;
             }
-            if (copyToast) {
-                copyToast.classList.add('show');
-                setTimeout(() => copyToast.classList.remove('show'), 2500);
-            }
+            showToast(copyToast, 2500);
         });
     });
 
     const form = document.getElementById('reservationForm');
     if (form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const toast = document.getElementById('toast');
-            if (toast) {
-                toast.classList.add('show');
-                setTimeout(() => toast.classList.remove('show'), 4000);
-            }
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            showToast(document.getElementById('toast'), 4000);
             form.reset();
         });
     }
 
     const dateInput = document.getElementById('date');
-    if (dateInput) {
-        dateInput.min = new Date().toISOString().split('T')[0];
-    }
+    if (dateInput) dateInput.min = new Date().toISOString().split('T')[0];
 });

@@ -19,9 +19,16 @@
         />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
         <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css" />
-        <link rel="stylesheet" href="style.css?v=10" />
+        <link rel="stylesheet" href="style.css?v=19" />
     </head>
     <body>
+        <div class="entry" id="entry">
+            <canvas class="entry-canvas" id="entryCanvas" aria-hidden="true"></canvas>
+            <p class="entry-kicker">Club de gaming · Ciocana, Chișinău</p>
+            <button type="button" class="entry-enter" id="entryEnter">Click oriunde pentru a intra</button>
+            <button type="button" class="entry-skip" id="entrySkip">Sari peste</button>
+        </div>
+
         <nav id="navbar">
             <div class="nav-container">
                 <a href="#home" class="logo">
@@ -141,18 +148,30 @@
 
         <section class="offers" id="preturi">
             <div class="offers-sticky">
-                <div class="offers-track" id="offersTrack">
-                    <div class="offers-intro">
-                        <p class="eyebrow">Oferte</p>
-                        <h2>
-                            Alege
-                            <br />
-                            oferta
-                        </h2>
-                        <p>Prețuri mai mici de luni până joi. Derulează mai departe.</p>
+                <div class="offers-head">
+                    <div>
+                        <p class="eyebrow">Oferte · mai ieftin de luni până joi</p>
+                        <h2>Alege oferta</h2>
                     </div>
-
-                    <article class="offer" data-tilt="-5">
+                    <div class="offers-controls">
+                        <div class="offers-tabs">
+                            <button type="button" class="offers-tab active">VIP PC+</button>
+                            <button type="button" class="offers-tab">VIP PC</button>
+                            <button type="button" class="offers-tab">PlayStation 5</button>
+                            <button type="button" class="offers-tab">Noapte</button>
+                        </div>
+                        <div class="offers-arrows">
+                            <button type="button" id="offersPrev" aria-label="Oferta anterioară">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <button type="button" id="offersNext" aria-label="Oferta următoare">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="offers-track" id="offersTrack">
+                    <article class="offer">
                         <p class="offer-num">01</p>
                         <h3>VIP PC+</h3>
                         <p class="offer-spec">RTX 3070 / 3070 Ti · Intel i5-14th / i7 · 27” 200–280 Hz</p>
@@ -194,7 +213,7 @@
                         </table>
                     </article>
 
-                    <article class="offer" data-tilt="4">
+                    <article class="offer">
                         <p class="offer-num">02</p>
                         <h3>VIP PC</h3>
                         <p class="offer-spec">RTX 4060 · Intel i5-12th · 27” Samsung Odyssey 180 Hz</p>
@@ -236,7 +255,7 @@
                         </table>
                     </article>
 
-                    <article class="offer" data-tilt="-3">
+                    <article class="offer">
                         <p class="offer-num">03</p>
                         <h3>PlayStation 5</h3>
                         <p class="offer-spec">Console PS5 oficiale · ecrane 4K · controllere DualSense</p>
@@ -278,7 +297,7 @@
                         </table>
                     </article>
 
-                    <article class="offer offer-dark" data-tilt="5">
+                    <article class="offer offer-dark">
                         <p class="offer-num">04</p>
                         <h3>Pachet de noapte</h3>
                         <p class="offer-spec">23:00 – 06:00 · șapte ore la preț fix</p>
@@ -315,14 +334,10 @@
                         </table>
                     </article>
 
-                    <div class="offers-outro">
-                        <h2>
-                            Loc liber
-                            <br />
-                            pentru tine?
-                        </h2>
-                        <a href="#contact" class="btn">Rezervă acum</a>
-                    </div>
+                </div>
+                <div class="offers-foot">
+                    <span class="offers-hint">Derulează, trage cu mouse-ul sau folosește săgețile</span>
+                    <a href="#contact" class="btn">Rezervă acum</a>
                 </div>
                 <div class="offers-progress"><span id="offersBar"></span></div>
             </div>
@@ -650,8 +665,10 @@
 
         <script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
         <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
-        <script src="map.js?v=10"></script>
-        <script src="scene.js?v=10"></script>
-        <script src="script.js?v=10"></script>
+        <script src="logo-data.js?v=19"></script>
+        <script src="entry.js?v=19"></script>
+        <script src="map.js?v=19"></script>
+        <script src="scene.js?v=19"></script>
+        <script src="script.js?v=19"></script>
     </body>
 </html>

@@ -38,19 +38,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const offersTrack = document.getElementById('offersTrack');
     const offersBar = document.getElementById('offersBar');
     const offersSticky = offers ? offers.querySelector('.offers-sticky') : null;
-    const offerItems = offersTrack ? [...offersTrack.children] : [];
-    const offerCards = offerItems.filter((item) => item.classList.contains('offer'));
+    const offerCards = offers ? [...offers.querySelectorAll('.offer')] : [];
+    const offerTabs = offers ? [...offers.querySelectorAll('.offers-tab')] : [];
+    const offersPrev = document.getElementById('offersPrev');
+    const offersNext = document.getElementById('offersNext');
+    let offerStops = [];
     let offersDist = 0;
     let offersPinned = false;
+    let offerActive = 0;
+    let offerShift = 0;
+    let offerDirection = 0;
+    let offerSnapTimer;
+    let offerDragId = null;
 
-    const tiltCards = (shift) => {
-        const center = offersSticky.clientWidth / 2;
-        offerCards.forEach((card) => {
-            const tilt = Number(card.dataset.tilt);
-            const distance = (card.offsetLeft + card.offsetWidth / 2 - shift - center) / center;
-            const amount = motionOff ? 0 : Math.min(Math.abs(distance), 1);
-            card.style.transform = `translateY(${amount * Math.sign(tilt) * 26}px) rotate(${tilt * amount}deg)`;
-        });
+    const offersTop = () => offers.getBoundingClientRect().top + window.scrollY;
+    const setOfferShift = (shift) => {
+        if (shift !== offerShift) offerDirection = Math.sign(shift - offerShift);
+        offerShift = shift;
+        offerActive = offerStops.reduce(
+            (best, stop, index) =>
+                Math.abs(stop - shift) < Math.abs(offerStops[best] - shift) ? index : best,
+            0,
+        );
+        offerCards.forEach((card, index) => card.classList.toggle('active', index === offerActive));
+        offerTabs.forEach((tab, index) => tab.classList.toggle('active', index === offerActive));
+        offersPrev.disabled = offerActive === 0;
+        offersNext.disabled = offerActive === offerCards.length - 1;
+        offersBar.style.width = `${offersDist ? (shift / offersDist) * 100 : 0}%`;
+    };
+    const scrollOffersTo = (shift) => {
+        if (offersPinned) window.scrollTo({ top: offersTop() + shift, behavior: 'smooth' });
+        else offersTrack.scrollTo({ left: shift, behavior: 'smooth' });
+    };
+    const goToOffer = (index) => {
+        scrollOffersTo(offerStops[Math.min(Math.max(index, 0), offerCards.length - 1)]);
+    };
+    const snapOffers = () => {
+        clearTimeout(offerSnapTimer);
+        if (!offersPinned || offerDragId !== null) return;
+        offerSnapTimer = setTimeout(() => {
+            if (offerShift <= 2 || offerShift >= offersDist - 2) return;
+            let target = offerStops[offerActive];
+            if (offerDirection > 0) target = offerStops.find((stop) => stop >= offerShift - 24);
+            if (offerDirection < 0) {
+                target = [...offerStops].reverse().find((stop) => stop <= offerShift + 24);
+            }
+            if (target !== undefined && Math.abs(target - offerShift) > 3) scrollOffersTo(target);
+        }, 170);
     };
     const layoutOffers = () => {
         if (!offers) return;
@@ -58,12 +92,11 @@ document.addEventListener('DOMContentLoaded', () => {
         offers.style.height = '';
         offersTrack.style.transform = '';
 
-        const first = offerItems[0];
-        const last = offerItems[offerItems.length - 1];
-        offersDist = Math.max(
-            last.offsetLeft + last.offsetWidth + first.offsetLeft - offersSticky.clientWidth,
-            0,
+        const center = offersSticky.clientWidth / 2;
+        offerStops = offerCards.map((card) =>
+            Math.max(Math.round(card.offsetLeft + card.offsetWidth / 2 - center), 0),
         );
+        offersDist = offerStops[offerStops.length - 1];
         offersSticky.style.height = 'auto';
         const neededHeight = offersSticky.offsetHeight;
         offersSticky.style.height = '';
@@ -71,21 +104,64 @@ document.addEventListener('DOMContentLoaded', () => {
         offersPinned = !motionOff && offersDist > 0 && neededHeight <= offersSticky.offsetHeight;
         offers.classList.toggle('no-pin', !offersPinned);
         if (offersPinned) offers.style.height = `${offersSticky.offsetHeight + offersDist}px`;
-        else tiltCards(offersTrack.scrollLeft);
+        setOfferShift(offersPinned ? 0 : offersTrack.scrollLeft);
     };
     const updateOffers = () => {
         if (!offers || !offersPinned) return;
-        const progress = clamp01(-offers.getBoundingClientRect().top / offersDist);
-        offersTrack.style.transform = `translate3d(${-progress * offersDist}px, 0, 0)`;
-        offersBar.style.width = `${progress * 100}%`;
-        tiltCards(progress * offersDist);
+        const shift = clamp01(-offers.getBoundingClientRect().top / offersDist) * offersDist;
+        offersTrack.style.transform = `translate3d(${-shift}px, 0, 0)`;
+        const moved = shift !== offerShift;
+        setOfferShift(shift);
+        if (moved) snapOffers();
     };
     if (offers) {
         offersTrack.addEventListener('scroll', () => {
-            if (offersPinned) return;
-            const max = offersTrack.scrollWidth - offersTrack.clientWidth;
-            offersBar.style.width = `${max > 0 ? (offersTrack.scrollLeft / max) * 100 : 0}%`;
-            tiltCards(offersTrack.scrollLeft);
+            if (!offersPinned) setOfferShift(offersTrack.scrollLeft);
+        });
+        offerTabs.forEach((tab, index) => tab.addEventListener('click', () => goToOffer(index)));
+        offersPrev.addEventListener('click', () => goToOffer(offerActive - 1));
+        offersNext.addEventListener('click', () => goToOffer(offerActive + 1));
+        window.addEventListener('keydown', (event) => {
+            if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+            if (/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName)) return;
+            const rect = offersSticky.getBoundingClientRect();
+            if (rect.top > window.innerHeight * 0.5 || rect.bottom < window.innerHeight * 0.5) return;
+            event.preventDefault();
+            goToOffer(offerActive + (event.key === 'ArrowRight' ? 1 : -1));
+        });
+
+        let dragX = 0;
+        let dragMoved = 0;
+        offersTrack.addEventListener('pointerdown', (event) => {
+            if (event.pointerType === 'mouse' && event.button !== 0) return;
+            offerDragId = event.pointerId;
+            dragX = event.clientX;
+            dragMoved = 0;
+            clearTimeout(offerSnapTimer);
+        });
+        window.addEventListener('pointermove', (event) => {
+            if (event.pointerId !== offerDragId) return;
+            const dx = event.clientX - dragX;
+            dragX = event.clientX;
+            dragMoved += Math.abs(dx);
+            if (dragMoved < 6) return;
+            offers.classList.add('dragging');
+            if (offersPinned) window.scrollBy({ top: -dx, behavior: 'instant' });
+            else if (event.pointerType === 'mouse') offersTrack.scrollLeft -= dx;
+        });
+        const endDrag = (event) => {
+            if (event.pointerId !== offerDragId) return;
+            offerDragId = null;
+            offers.classList.remove('dragging');
+            if (dragMoved >= 6) snapOffers();
+        };
+        window.addEventListener('pointerup', endDrag);
+        window.addEventListener('pointercancel', endDrag);
+        offersTrack.addEventListener('dragstart', (event) => event.preventDefault());
+        offerCards.forEach((card, index) => {
+            card.addEventListener('click', () => {
+                if (dragMoved < 6 && index !== offerActive) goToOffer(index);
+            });
         });
     }
 

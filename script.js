@@ -101,7 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const neededHeight = offersSticky.offsetHeight;
         offersSticky.style.height = '';
 
-        offersPinned = !motionOff && offersDist > 0 && neededHeight <= offersSticky.offsetHeight;
+        const touchScreen = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 700;
+        offersPinned =
+            !motionOff &&
+            !touchScreen &&
+            offersDist > 0 &&
+            neededHeight <= offersSticky.offsetHeight;
         offers.classList.toggle('no-pin', !offersPinned);
         if (offersPinned) offers.style.height = `${offersSticky.offsetHeight + offersDist}px`;
         setOfferShift(offersPinned ? 0 : offersTrack.scrollLeft);

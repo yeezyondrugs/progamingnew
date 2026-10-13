@@ -279,7 +279,7 @@ h2 {
 }
 .scene-title h1 {
   animation: titleIn 1.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  font-size: clamp(2.2rem, 7.4vw, 7.6rem);
+  font-size: clamp(2rem, 6.1vw, 6.3rem);
   font-weight: 800;
   line-height: 0.92;
   letter-spacing: -0.02em;
@@ -1207,7 +1207,7 @@ footer {
 }
 .hero h1 {
   margin-bottom: 26px;
-  font-size: clamp(2.4rem, 8vw, 6.5rem);
+  font-size: clamp(2.1rem, 6.6vw, 5.4rem);
   font-weight: 800;
   line-height: 0.92;
   letter-spacing: -0.035em;
@@ -1924,5 +1924,16 @@ body::after {
   }
   .offer-from strong {
     font-size: 2.8rem;
+  }
+}
+
+.offers.no-pin .offers-track {
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 700px) {
+  .offers.no-pin .offers-sticky {
+    padding: 64px 0 56px;
   }
 }

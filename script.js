@@ -90,13 +90,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!offers) return;
         const center = offersSticky.clientWidth / 2;
         const measureStops = () => {
+            const alignStart = getComputedStyle(offerCards[0]).scrollSnapAlign.includes('start');
             offerStops = offerCards.map((card) =>
-                Math.max(Math.round(card.offsetLeft + card.offsetWidth / 2 - center), 0),
+                alignStart
+                    ? card.offsetLeft - offerCards[0].offsetLeft
+                    : Math.max(Math.round(card.offsetLeft + card.offsetWidth / 2 - center), 0),
             );
             offersDist = offerStops[offerStops.length - 1];
         };
         const touchScreen = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 700;
-        offers.classList.toggle('offers-stack', touchScreen);
         if (motionOff || touchScreen) {
             offersPinned = false;
             offers.classList.add('no-pin');

@@ -1947,7 +1947,18 @@ body::after {
 }
 @media (max-width: 700px) {
   .offers.no-pin .offers-sticky {
+    --card: 80vw;
     padding: 64px 0 56px;
+  }
+  /* Pe telefon cardul activ sta la stanga, urmatorul se vede in dreapta; un swipe = un card. */
+  .offers.no-pin .offers-track {
+    padding: 8px calc(100% - var(--card) - 16px) 8px 16px;
+    scroll-padding-left: 16px;
+  }
+  .offers.no-pin .offer {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    transform-origin: left center;
   }
 }
 
@@ -1976,30 +1987,4 @@ body::after {
   background:
     radial-gradient(46% 40% at 50% 58%, rgba(255, 255, 255, 0.11), transparent 72%),
     radial-gradient(70% 34% at 50% 100%, rgba(255, 255, 255, 0.05), transparent 70%);
-}
-.offers.offers-stack .offers-sticky {
-  padding: 64px 0 56px;
-}
-.offers.offers-stack .offers-track {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-  gap: 16px;
-  padding: 0 16px;
-  overflow: visible;
-  scroll-snap-type: none;
-  cursor: default;
-  touch-action: auto;
-  user-select: auto;
-  -webkit-user-select: auto;
-}
-.offers.offers-stack .offer {
-  opacity: 1;
-  transform: none;
-  cursor: default;
-  transition: none;
-}
-.offers.offers-stack .offers-controls,
-.offers.offers-stack .offers-hint,
-.offers.offers-stack .offers-progress {
-  display: none;
 }

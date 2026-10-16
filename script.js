@@ -95,7 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
             );
             offersDist = offerStops[offerStops.length - 1];
         };
-        if (motionOff || window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 700) {
+        const touchScreen = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 700;
+        offers.classList.toggle('offers-stack', touchScreen);
+        if (motionOff || touchScreen) {
             offersPinned = false;
             offers.classList.add('no-pin');
             offers.style.height = '';

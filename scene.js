@@ -12,6 +12,7 @@
     const motionOff = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const lite = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 700;
+    const weak = lite || (navigator.hardwareConcurrency || 8) <= 4;
     const useStatic = () => section.classList.add('scene-static');
     if (!window.THREE) {
         useStatic();
@@ -22,7 +23,7 @@
     try {
         renderer = new THREE.WebGLRenderer({
             canvas,
-            antialias: !lite,
+            antialias: !weak,
             alpha: true,
             powerPreference: 'high-performance',
         });
@@ -30,7 +31,8 @@
         useStatic();
         return;
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.25 : 2));
+    const basePixelRatio = Math.min(window.devicePixelRatio || 1, lite ? 1.25 : 1.5);
+    renderer.setPixelRatio(basePixelRatio);
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.8;
@@ -201,7 +203,7 @@
             depth: 0.012,
             bevelEnabled: false,
         });
-        const bladeCount = lite ? 6 : 9;
+        const bladeCount = weak ? 6 : 8;
         for (let i = 0; i < bladeCount; i++) {
             const pivot = new THREE.Group();
             pivot.rotation.z = (i / bladeCount) * Math.PI * 2;
@@ -319,7 +321,7 @@
     addPart('cpu', cpu, [0, 0, 0.3]);
 
     const cooler = new THREE.Group();
-    const finCount = lite ? 8 : 22;
+    const finCount = weak ? 8 : 14;
     for (let i = 0; i < finCount; i++) {
         cooler.add(box(1.0, 0.018, 0.5, alu, 0, -0.48 + (i * 0.966) / (finCount - 1), 0));
     }
@@ -366,8 +368,8 @@
     const gpu = new THREE.Group();
     gpu.add(slab(3.05, 0.5, 1.4, 0.05, white));
     gpu.add(slab(3.05, 0.05, 1.44, 0.02, alu, 0, 0.29, 0));
-    if (!lite) {
-        for (let i = 0; i < 40; i++) gpu.add(box(0.012, 0.3, 1.3, alu, -1.35 + i * 0.07, -0.08, 0));
+    if (!weak) {
+        for (let i = 0; i < 20; i++) gpu.add(box(0.012, 0.3, 1.3, alu, -1.35 + i * 0.14, -0.08, 0));
     }
     gpu.add(slab(3.05, 0.12, 1.44, 0.04, white, 0, -0.3, 0));
     gpu.add(box(0.06, 1.0, 1.44, steel, -1.56, -0.05, 0));
@@ -519,6 +521,11 @@
     let activeStep = -2;
     let eased = -1;
     let skip = false;
+    let lastGap = 0;
+    let frameAvg = 17;
+    let frameCount = 0;
+    let quality = 1;
+    let halfRate = false;
     const styleCache = {};
 
     const resize = () => {
@@ -542,7 +549,20 @@
     const render = (time) => {
         if (visible) frame = requestAnimationFrame(render);
         if (document.documentElement.classList.contains('entry-lock')) return;
-        skip = lite && !skip;
+        const gap = time - lastGap;
+        lastGap = time;
+        if (gap > 0 && gap < 250) frameAvg += (gap - frameAvg) * 0.1;
+        if (++frameCount % 40 === 0 && frameAvg > 26) {
+            if (quality > 0.5) {
+                quality = Math.max(0.5, quality * 0.8);
+                renderer.setPixelRatio(basePixelRatio * quality);
+                renderer.setSize(width, height, false);
+                frameAvg = 18;
+            } else {
+                halfRate = true;
+            }
+        }
+        skip = (lite || halfRate) && !skip;
         if (skip) return;
         const delta = Math.min((time - lastTime) / 1000, 0.07);
         lastTime = time;
@@ -575,7 +595,6 @@
         cameraDrift.z = lerp(0, -0.035, explode);
         camera.rotation.z = cameraDrift.z;
         setStyle('bars', explode.toFixed(2), (v) => sticky.style.setProperty('--bars', v));
-        setStyle('light', (0.35 + rise * 0.65).toFixed(2), (v) => sticky.style.setProperty('--light', v));
 
         Object.values(parts).forEach((part) => {
             part.group.position
@@ -596,30 +615,53 @@
             linesSvg.style.opacity = v;
             labels.forEach(({ el }) => (el.style.opacity = v));
         });
-        if (labelAlpha > 0) labels.forEach(({ el, line, part, anchor, side, drop, w, h }) => {
-            if (!w) {
-                line.style.display = 'none';
-                return;
+        if (labelAlpha > 0) {
+            const placed = [];
+            labels.forEach((label) => {
+                const { line, part, anchor, side, drop, w, h } = label;
+                if (!w) {
+                    line.style.display = 'none';
+                    return;
+                }
+                line.style.display = '';
+                projected.copy(anchor);
+                part.group.localToWorld(projected);
+                projected.project(camera);
+                const x = (projected.x * 0.5 + 0.5) * width;
+                const y = (-projected.y * 0.5 + 0.5) * height;
+                const half = w / 2 + 10;
+                const gap = wide ? drop : Math.min(drop, 30);
+                label.x = x;
+                label.y = y;
+                label.labelX = Math.min(Math.max(x, half), width - half);
+                label.labelY =
+                    side > 0
+                        ? Math.min(y + gap, height - h - 60)
+                        : Math.max(y - gap - h, 70);
+                placed.push(label);
+            });
+            if (!wide) {
+                // Pe ecrane inguste etichetele se suprapun: le impingem pe verticala.
+                placed.sort((a, b) => a.labelY - b.labelY);
+                placed.forEach((label, i) => {
+                    for (let j = 0; j < i; j++) {
+                        const other = placed[j];
+                        const overlapX = Math.abs(label.labelX - other.labelX) < (label.w + other.w) / 2 + 6;
+                        if (overlapX && label.labelY < other.labelY + other.h + 6) {
+                            label.labelY = other.labelY + other.h + 6;
+                        }
+                    }
+                });
             }
-            line.style.display = '';
-            projected.copy(anchor);
-            part.group.localToWorld(projected);
-            projected.project(camera);
-            const x = (projected.x * 0.5 + 0.5) * width;
-            const y = (-projected.y * 0.5 + 0.5) * height;
-            const half = w / 2 + 10;
-            const gap = wide ? drop : Math.min(drop, 30);
-            const labelX = Math.min(Math.max(x, half), width - half);
-            const labelY =
-                side > 0
-                    ? Math.min(y + gap, height - h - 60)
-                    : Math.max(y - gap - h, 70);
-            el.style.transform = `translate(${labelX}px, ${labelY}px) translate(-50%, 0)`;
-            line.setAttribute('x1', x);
-            line.setAttribute('y1', y + side * 4);
-            line.setAttribute('x2', labelX);
-            line.setAttribute('y2', side > 0 ? labelY - 4 : labelY + h + 4);
-        });
+            placed.forEach(({ el, line, x, y, labelX, labelY, h }) => {
+                const above = labelY + h < y;
+                el.style.transform = `translate(${labelX}px, ${labelY}px) translate(-50%, 0)`;
+                line.setAttribute('x1', x);
+                line.setAttribute('y1', y + (above ? -4 : 4));
+                line.setAttribute('x2', labelX);
+                line.setAttribute('y2', above ? labelY + h + 4 : labelY - 4);
+            });
+        }
 
         const step = progress < 0.14 ? -1 : progress < 0.36 ? 0 : progress < 0.74 ? 1 : 2;
         if (step !== activeStep) {

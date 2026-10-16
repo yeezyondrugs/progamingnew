@@ -7,6 +7,7 @@
     const skipButton = document.getElementById('entrySkip');
     const motionOff = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const lite = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 700;
+    const weak = lite || (navigator.hardwareConcurrency || 8) <= 4;
 
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     const navigation = performance.getEntriesByType('navigation')[0];
@@ -44,7 +45,7 @@
     try {
         renderer = new THREE.WebGLRenderer({
             canvas,
-            antialias: !lite,
+            antialias: !weak,
             powerPreference: 'high-performance',
         });
     } catch (error) {
@@ -53,7 +54,8 @@
     }
     document.documentElement.classList.add('entry-lock');
     window.scrollTo({ top: 0, behavior: 'instant' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.25 : 2));
+    const basePixelRatio = Math.min(window.devicePixelRatio || 1, lite ? 1.25 : 1.5);
+    renderer.setPixelRatio(basePixelRatio);
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.8;
@@ -294,7 +296,7 @@
         [CYAN, 0.4, -6, 2.5, -6],
         [PINK, 0.4, 6, 2.5, -6],
     ]
-        .slice(0, lite ? 2 : 4)
+        .slice(0, weak ? 2 : 4)
         .forEach(([color, intensity, x, y, z]) => {
         const light = new THREE.PointLight(color, intensity, 20);
         light.position.set(x, y, z);
@@ -353,7 +355,7 @@
         box(0.8, 0.07, 10.6, deskWood, side * 8.45, 2.35, -6.1);
         neon(0.04, 0.04, 10.6, side > 0 ? PINK : CYAN, side * 8.06, 2.3, -6.1);
 
-        for (let i = 0; i < 6; i += lite ? 2 : 1) {
+        for (let i = 0; i < 6; i += weak ? 2 : 1) {
             const z = -1.6 - i * 1.7;
             const accent = [CYAN, PINK, PURPLE][(i + (side > 0 ? 1 : 0)) % 3];
 
@@ -607,6 +609,10 @@
     let startedAt = 0;
     let finished = false;
     let frame = 0;
+    let lastGap = 0;
+    let frameAvg = 17;
+    let frameCount = 0;
+    let quality = 1;
 
     const resize = () => {
         const width = entry.clientWidth;
@@ -639,6 +645,15 @@
     };
 
     const render = (time) => {
+        const gap = time - lastGap;
+        lastGap = time;
+        if (gap > 0 && gap < 250) frameAvg += (gap - frameAvg) * 0.1;
+        if (++frameCount % 30 === 0 && frameAvg > 26 && quality > 0.45) {
+            quality = Math.max(0.45, quality * 0.75);
+            renderer.setPixelRatio(basePixelRatio * quality);
+            resize();
+            frameAvg = 18;
+        }
         const flight = startedAt ? clamp01((time - startedAt) / DURATION) : 0;
         const eased = easeInOut(flight);
 

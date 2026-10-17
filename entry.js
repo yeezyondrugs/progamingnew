@@ -92,7 +92,11 @@
 
     const std = (color, roughness = 0.5, metalness = 0.4) =>
         new THREE.MeshStandardMaterial({ color, roughness, metalness });
-    const glow = (color) => new THREE.MeshBasicMaterial({ color });
+    const glowCache = new Map();
+    const glow = (color) => {
+        if (!glowCache.has(color)) glowCache.set(color, new THREE.MeshBasicMaterial({ color }));
+        return glowCache.get(color);
+    };
     const add = (mesh, x = 0, y = 0, z = 0) => {
         mesh.position.set(x, y, z);
         scene.add(mesh);
@@ -346,6 +350,7 @@
             for (let y = 0; y < h; y += 8) ctx.fillRect(0, y, w, 2);
         }),
     });
+    const screenMaterials = gameScreens.map((map) => new THREE.MeshBasicMaterial({ map }));
     const chairMaterial = std(0x09070d, 0.55, 0.3);
     const ringGeometry = new THREE.TorusGeometry(0.2, 0.028, 8, 32);
 
@@ -363,7 +368,7 @@
             box(0.2, 0.2, 0.3, dark, side * 8.2, 1.04, z);
             const screen = new THREE.Mesh(
                 new THREE.PlaneGeometry(0.92, 0.5),
-                new THREE.MeshBasicMaterial({ map: gameScreens[(i + (side > 0 ? 2 : 0)) % 3] }),
+                screenMaterials[(i + (side > 0 ? 2 : 0)) % 3],
             );
             screen.rotation.y = -side * (Math.PI / 2);
             add(screen, side * (8.2 - 0.03), 1.42, z);
@@ -588,6 +593,55 @@
     neon(70, 0.04, 0.08, PINK, 0, 0.03, 1.7);
     neon(70, 0.04, 0.08, CYAN, 0, 0.03, 2.1);
 
+    // Optimizare: toate obiectele statice cu acelasi material devin un singur mesh.
+    // Sute de apeluri de desenare devin cateva zeci, deci cadre constante si pe placi video slabe.
+    [...doors, enterSign, ...arrows].forEach((item) => item.traverse((o) => (o.userData.dynamic = true)));
+    scene.updateMatrixWorld(true);
+    const buckets = new Map();
+    const merged = [];
+    scene.traverse((object) => {
+        if (!object.isMesh || object.userData.dynamic || object.material.transparent) return;
+        let geometry = object.geometry.index ? object.geometry.toNonIndexed() : object.geometry.clone();
+        geometry.applyMatrix4(object.matrixWorld);
+        if (!buckets.has(object.material)) buckets.set(object.material, []);
+        buckets.get(object.material).push(geometry);
+        merged.push(object);
+    });
+    merged.forEach((object) => object.parent.remove(object));
+    buckets.forEach((geometries, material) => {
+        const geometry = new THREE.BufferGeometry();
+        ['position', 'normal', 'uv'].forEach((name) => {
+            const size = geometries[0].attributes[name].itemSize;
+            const total = geometries.reduce((sum, g) => sum + g.attributes[name].array.length, 0);
+            const array = new Float32Array(total);
+            let offset = 0;
+            geometries.forEach((g) => {
+                array.set(g.attributes[name].array, offset);
+                offset += g.attributes[name].array.length;
+                if (name === 'uv') g.dispose();
+            });
+            geometry.setAttribute(name, new THREE.BufferAttribute(array, size));
+        });
+        geometry.computeBoundingSphere();
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.matrixAutoUpdate = false;
+        scene.add(mesh);
+    });
+    scene.traverse((object) => {
+        if (object.isMesh || object.isSprite) object.matrixAutoUpdate = !!object.userData.dynamic;
+        if (object.isMesh || object.isSprite) object.updateMatrix();
+    });
+    // Trimitem toate texturile la placa video acum, nu in mijlocul zborului cand intra in cadru.
+    const uploadTextures = () => {
+        scene.traverse((object) => {
+            const material = object.material;
+            if (!material) return;
+            [material.map, material.emissiveMap].forEach((texture) => {
+                if (texture && texture.image) renderer.initTexture(texture);
+            });
+        });
+    };
+
     const startPoint = new THREE.Vector3(0, 2.6, 29);
     const positions = new THREE.CatmullRomCurve3([
         startPoint,
@@ -616,9 +670,13 @@
     let frameCount = 0;
     let quality = 1;
 
+    // Limitam numarul de pixeli desenati: ecranele mari/dense nu mai sufoca placa video.
+    const PIXEL_BUDGET = lite ? 1.1e6 : 2.2e6;
     const resize = () => {
         const width = entry.clientWidth;
         const height = entry.clientHeight;
+        const fit = Math.sqrt(PIXEL_BUDGET / Math.max(width * height, 1));
+        renderer.setPixelRatio(Math.max(Math.min(basePixelRatio, fit) * quality, 0.5));
         renderer.setSize(width, height, false);
         camera.aspect = width / height;
         const narrow = camera.aspect < 0.8;
@@ -652,11 +710,14 @@
         const gap = time - lastGap;
         lastGap = time;
         if (gap > 0 && gap < 250) frameAvg += (gap - frameAvg) * 0.1;
-        if (++frameCount % 30 === 0 && frameAvg > 26 && quality > 0.45) {
-            quality = Math.max(0.45, quality * 0.75);
-            renderer.setPixelRatio(basePixelRatio * quality);
+        // Calitatea se regleaza in asteptare (sub ~55 fps). In zbor doar daca e foarte greu,
+        // pentru ca schimbarea rezolutiei in sine produce o mica sacadare.
+        frameCount++;
+        const limit = startedAt ? 30 : 18;
+        if (frameCount > 60 && frameCount % 30 === 0 && frameAvg > limit && quality > 0.5) {
+            quality = Math.max(0.5, quality * 0.85);
             resize();
-            frameAvg = 18;
+            frameAvg = 16;
         }
         const flight = startedAt ? clamp01((time - startedAt) / DURATION) : 0;
         const eased = easeInOut(flight);
@@ -706,8 +767,10 @@
     };
 
     resize();
-    // Compilam shaderele dinainte, ca primul cadru al zborului sa nu se blocheze.
+    // Compilam shaderele si urcam texturile dinainte, ca zborul sa nu se blocheze.
     renderer.compile(scene, camera);
+    uploadTextures();
+    if (logoTexture.image) renderer.initTexture(logoTexture);
     window.addEventListener('resize', resize);
     canvas.addEventListener('click', start);
     enterButton.addEventListener('click', start);

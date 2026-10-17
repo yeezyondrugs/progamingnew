@@ -673,6 +673,12 @@
     };
 
     resize();
+    // Pregatim shaderele si texturile cat timp ruleaza intrarea, ca trecerea spre site sa fie fluida.
+    renderer.compile(scene, camera);
+    scene.traverse((object) => {
+        const material = object.material;
+        if (material && material.map && material.map.image) renderer.initTexture(material.map);
+    });
     window.addEventListener('resize', resize);
     window.addEventListener('pointermove', (event) => {
         pointer.x = (event.clientX / window.innerWidth - 0.5) * 2;

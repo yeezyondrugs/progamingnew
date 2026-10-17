@@ -520,17 +520,19 @@
     let lastTime = 0;
     let activeStep = -2;
     let eased = -1;
-    let skip = false;
     let lastGap = 0;
     let frameAvg = 17;
     let frameCount = 0;
     let quality = 1;
-    let halfRate = false;
     const styleCache = {};
 
+    // Limita de pixeli: pe ecranele dense/slabe desenam mai putini pixeli, dar la fiecare cadru.
+    const PIXEL_BUDGET = lite ? 0.9e6 : 2.2e6;
     const resize = () => {
         width = sticky.clientWidth;
         height = sticky.clientHeight;
+        const fit = Math.sqrt(PIXEL_BUDGET / Math.max(width * height, 1));
+        renderer.setPixelRatio(Math.max(Math.min(basePixelRatio, fit) * quality, 0.5));
         renderer.setSize(width, height, false);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
@@ -552,18 +554,12 @@
         const gap = time - lastGap;
         lastGap = time;
         if (gap > 0 && gap < 250) frameAvg += (gap - frameAvg) * 0.1;
-        if (++frameCount % 40 === 0 && frameAvg > 26) {
-            if (quality > 0.5) {
-                quality = Math.max(0.5, quality * 0.8);
-                renderer.setPixelRatio(basePixelRatio * quality);
-                renderer.setSize(width, height, false);
-                frameAvg = 18;
-            } else {
-                halfRate = true;
-            }
+        // Tinta e 60 fps la fiecare cadru: daca nu ajungem, scadem rezolutia, nu sarim cadre.
+        if (++frameCount > 40 && frameCount % 30 === 0 && frameAvg > 18 && quality > 0.5) {
+            quality = Math.max(0.5, quality * 0.85);
+            resize();
+            frameAvg = 16;
         }
-        skip = (lite || halfRate) && !skip;
-        if (skip) return;
         const delta = Math.min((time - lastTime) / 1000, 0.07);
         lastTime = time;
 

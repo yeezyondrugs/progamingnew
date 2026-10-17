@@ -211,6 +211,15 @@
     });
     gridTexture.wrapS = gridTexture.wrapT = THREE.RepeatWrapping;
     gridTexture.repeat.set(52, 52);
+    const fastGroundTexture = canvasTexture(256, 256, (ctx, w, h) => {
+        ctx.fillStyle = '#34204a';
+        ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = '#ff3fa4';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(0, 0, w, h);
+    });
+    fastGroundTexture.wrapS = fastGroundTexture.wrapT = THREE.RepeatWrapping;
+    fastGroundTexture.repeat.set(52, 52);
     const ground = new THREE.Mesh(
         new THREE.PlaneGeometry(260, 260),
         new THREE.MeshStandardMaterial({
@@ -599,6 +608,7 @@
     scene.updateMatrixWorld(true);
     const buckets = new Map();
     const merged = [];
+    const litMeshes = [];
     scene.traverse((object) => {
         if (!object.isMesh || object.userData.dynamic || object.material.transparent) return;
         let geometry = object.geometry.index ? object.geometry.toNonIndexed() : object.geometry.clone();
@@ -626,11 +636,79 @@
         const mesh = new THREE.Mesh(geometry, material);
         mesh.matrixAutoUpdate = false;
         scene.add(mesh);
+        if (material.isMeshStandardMaterial) litMeshes.push(mesh);
     });
     scene.traverse((object) => {
         if (object.isMesh || object.isSprite) object.matrixAutoUpdate = !!object.userData.dynamic;
         if (object.isMesh || object.isSprite) object.updateMatrix();
     });
+    // Mod rapid pentru dispozitive slabe: lumina se calculeaza o singura data, pe varfuri,
+    // si se deseneaza cu cel mai simplu shader (fara reflexii si fara lumini in timp real).
+    const ENV_AMBIENT = 0.3;
+    let fastMode = false;
+    const enableFastMode = () => {
+        if (fastMode) return;
+        fastMode = true;
+        const lights = [];
+        scene.traverse((object) => object.isLight && lights.push(object));
+        const normal = new THREE.Vector3();
+        const vertex = new THREE.Vector3();
+        const toLight = new THREE.Vector3();
+        const light = new THREE.Color();
+        const sky = new THREE.Color();
+        const basicCache = new Map();
+        litMeshes.forEach((mesh) => {
+            const material = mesh.material;
+            const positions = mesh.geometry.attributes.position;
+            const normals = mesh.geometry.attributes.normal;
+            const colors = new Float32Array(positions.count * 3);
+            // Palmierii erau umbriti in modul complet; ii pastram la fel de inchisi.
+            const shade = material === leafMaterial ? 0.35 : material === trunkMaterial ? 0.5 : 1;
+            const diffuse = (1 - material.metalness * 0.6) * shade;
+            const emissive = material.emissiveMap ? material.emissiveIntensity * material.emissive.r : 0;
+            for (let i = 0; i < positions.count; i++) {
+                vertex.fromBufferAttribute(positions, i);
+                normal.fromBufferAttribute(normals, i);
+                light.setRGB(ENV_AMBIENT * shade, ENV_AMBIENT * shade, ENV_AMBIENT * shade);
+                lights.forEach((source) => {
+                    if (source.isHemisphereLight) {
+                        sky.copy(source.groundColor).lerp(source.color, normal.y * 0.5 + 0.5);
+                        light.add(sky.multiplyScalar(source.intensity * diffuse));
+                    } else if (source.isDirectionalLight) {
+                        const dot = Math.max(normal.dot(toLight.copy(source.position).normalize()), 0);
+                        light.add(sky.copy(source.color).multiplyScalar(source.intensity * dot * diffuse));
+                    } else if (source.isPointLight) {
+                        toLight.copy(source.position).sub(vertex);
+                        const distance = toLight.length();
+                        const falloff = Math.pow(Math.max(1 - distance / source.distance, 0), source.decay);
+                        const dot = Math.max(normal.dot(toLight.normalize()), 0);
+                        light.add(sky.copy(source.color).multiplyScalar(source.intensity * dot * falloff * diffuse));
+                    }
+                });
+                colors[i * 3] = material.color.r * light.r + emissive;
+                colors[i * 3 + 1] = material.color.g * light.g + emissive;
+                colors[i * 3 + 2] = material.color.b * light.b + emissive;
+            }
+            mesh.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            if (material === ground.material) {
+                colors.fill(1);
+                if (!basicCache.has(material)) {
+                    basicCache.set(material, new THREE.MeshBasicMaterial({ map: fastGroundTexture, vertexColors: true }));
+                }
+            }
+            if (!basicCache.has(material)) {
+                basicCache.set(
+                    material,
+                    new THREE.MeshBasicMaterial({ map: material.map, vertexColors: true, side: material.side }),
+                );
+            }
+            mesh.material = basicCache.get(material);
+        });
+        lights.forEach((source) => source.parent.remove(source));
+        scene.environment = null;
+        renderer.compile(scene, camera);
+    };
+
     // Trimitem toate texturile la placa video acum, nu in mijlocul zborului cand intra in cadru.
     const uploadTextures = () => {
         scene.traverse((object) => {
@@ -714,9 +792,13 @@
         // pentru ca schimbarea rezolutiei in sine produce o mica sacadare.
         frameCount++;
         const limit = startedAt ? 30 : 18;
-        if (frameCount > 60 && frameCount % 30 === 0 && frameAvg > limit && quality > 0.5) {
-            quality = Math.max(0.5, quality * 0.85);
-            resize();
+        if (frameCount > 60 && frameCount % 30 === 0 && frameAvg > limit) {
+            // Intai trecem pe modul rapid (fara pierdere de rezolutie), apoi scadem rezolutia.
+            if (!fastMode && !startedAt) enableFastMode();
+            else if (quality > 0.5) {
+                quality = Math.max(0.5, quality * 0.85);
+                resize();
+            }
             frameAvg = 16;
         }
         const flight = startedAt ? clamp01((time - startedAt) / DURATION) : 0;
@@ -767,6 +849,7 @@
     };
 
     resize();
+    if (weak || /[?&]fast(&|$)/.test(location.search)) enableFastMode();
     // Compilam shaderele si urcam texturile dinainte, ca zborul sa nu se blocheze.
     renderer.compile(scene, camera);
     uploadTextures();

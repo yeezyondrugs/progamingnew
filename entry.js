@@ -5,7 +5,6 @@
     const canvas = document.getElementById('entryCanvas');
     const enterButton = document.getElementById('entryEnter');
     const skipButton = document.getElementById('entrySkip');
-    const motionOff = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const lite = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 700;
     const weak = lite || (navigator.hardwareConcurrency || 8) <= 4;
 
@@ -36,7 +35,8 @@
         document.documentElement.classList.remove('entry-lock');
         if (reloaded) settle();
     };
-    if (motionOff || !window.THREE) {
+    // Intrarea porneste doar la apasarea pe "Intra", asa ca o aratam si cu animatiile reduse.
+    if (!window.THREE) {
         close();
         return;
     }

@@ -220,12 +220,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (calc) {
         const PRICES = {
             vip: {
-                week: { '1h': 25, '3h': 60, '6h': 100, night: 100 },
-                weekend: { '1h': 30, '3h': 75, '6h': 120, night: 120 },
+                week: { '1h': 30, '3h': 75, '6h': 120, night: 120 },
+                weekend: { '1h': 35, '3h': 90, '6h': 140, night: 140 },
             },
             vipplus: {
-                week: { '1h': 35, '3h': 90, '6h': 140, night: 140 },
-                weekend: { '1h': 40, '3h': 105, '6h': 160, night: 160 },
+                week: { '1h': 40, '3h': 105, '6h': 160, night: 160 },
+                weekend: { '1h': 45, '3h': 120, '6h': 170, night: 170 },
             },
             ps5: {
                 week: { '1h': 50, '3h': 120, '6h': 200, night: 200 },

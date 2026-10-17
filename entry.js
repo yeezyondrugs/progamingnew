@@ -604,7 +604,11 @@
 
     const clamp01 = (value) => Math.min(Math.max(value, 0), 1);
     const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-    const DURATION = 4800;
+    // Pornire si oprire foarte line (acceleratia e zero la capete).
+    const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+    const DURATION = 5600;
+    const sway = { x: 0, y: 0 };
+    const swayFrom = { x: 0, y: 0 };
     const point = new THREE.Vector3();
     let startedAt = 0;
     let finished = false;
@@ -641,28 +645,37 @@
             window.removeEventListener('resize', resize);
             renderer.dispose();
             entry.remove();
-        }, 900);
+        }, 1300);
     };
 
     const render = (time) => {
         const gap = time - lastGap;
         lastGap = time;
         if (gap > 0 && gap < 250) frameAvg += (gap - frameAvg) * 0.1;
-        if (++frameCount % 30 === 0 && frameAvg > 26 && quality > 0.45) {
+        // Calitatea se ajusteaza doar inainte de zbor, ca sa nu sacadeze in timpul lui.
+        if (!startedAt && ++frameCount % 30 === 0 && frameAvg > 26 && quality > 0.45) {
             quality = Math.max(0.45, quality * 0.75);
             renderer.setPixelRatio(basePixelRatio * quality);
             resize();
             frameAvg = 18;
         }
         const flight = startedAt ? clamp01((time - startedAt) / DURATION) : 0;
-        const eased = easeInOut(flight);
+        const eased = smoother(flight);
 
-        positions.getPoint(eased, camera.position);
+        // getPointAt merge cu viteza constanta pe curba, fara accelerari bruste intre puncte.
+        positions.getPointAt(eased, camera.position);
         if (!startedAt) {
-            camera.position.x += Math.sin(time * 0.0003) * 0.6;
-            camera.position.y += Math.sin(time * 0.0005) * 0.1;
+            sway.x = Math.sin(time * 0.0003) * 0.6;
+            sway.y = Math.sin(time * 0.0005) * 0.1;
+        } else {
+            // Leganarea de asteptare se stinge treptat, nu dispare brusc la click.
+            const keep = 1 - smoother(clamp01(flight / 0.3));
+            sway.x = swayFrom.x * keep;
+            sway.y = swayFrom.y * keep;
         }
-        targets.getPoint(eased, point);
+        camera.position.x += sway.x;
+        camera.position.y += sway.y;
+        targets.getPointAt(eased, point);
         camera.lookAt(point);
 
         const open = easeInOut(clamp01((flight - 0.04) / 0.3));
@@ -679,17 +692,21 @@
         });
 
         renderer.render(scene, camera);
-        if (flight >= 0.97) finish();
+        if (flight >= 0.93) finish();
         if (!finished || entry.isConnected) frame = requestAnimationFrame(render);
     };
 
     const start = () => {
         if (startedAt || finished) return;
         startedAt = performance.now();
+        swayFrom.x = sway.x;
+        swayFrom.y = sway.y;
         entry.classList.add('flying');
     };
 
     resize();
+    // Compilam shaderele dinainte, ca primul cadru al zborului sa nu se blocheze.
+    renderer.compile(scene, camera);
     window.addEventListener('resize', resize);
     canvas.addEventListener('click', start);
     enterButton.addEventListener('click', start);

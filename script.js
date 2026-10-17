@@ -148,10 +148,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let dragX = 0;
         let dragMoved = 0;
+        let dragStartX = 0;
+        let dragStartIndex = 0;
         offersTrack.addEventListener('pointerdown', (event) => {
             if (event.pointerType === 'mouse' && event.button !== 0) return;
             offerDragId = event.pointerId;
             dragX = event.clientX;
+            dragStartX = event.clientX;
+            dragStartIndex = offerActive;
             dragMoved = 0;
             clearTimeout(offerSnapTimer);
         });
@@ -163,13 +167,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (dragMoved < 6) return;
             offers.classList.add('dragging');
             if (offersPinned) window.scrollBy({ top: -dx, behavior: 'instant' });
-            else if (event.pointerType === 'mouse') offersTrack.scrollLeft -= dx;
+            else offersTrack.scrollTo({ left: offersTrack.scrollLeft - dx, behavior: 'instant' });
         });
         const endDrag = (event) => {
             if (event.pointerId !== offerDragId) return;
             offerDragId = null;
             offers.classList.remove('dragging');
-            if (dragMoved >= 6) snapOffers();
+            if (dragMoved < 6) return;
+            if (offersPinned) {
+                snapOffers();
+                return;
+            }
+            // Un swipe muta exact un card, indiferent cat de tare e dat.
+            const swipe = event.type === 'pointerup' ? event.clientX - dragStartX : 0;
+            const step = swipe < -40 ? 1 : swipe > 40 ? -1 : 0;
+            goToOffer(dragStartIndex + step);
         };
         window.addEventListener('pointerup', endDrag);
         window.addEventListener('pointercancel', endDrag);

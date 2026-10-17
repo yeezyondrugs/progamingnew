@@ -1944,21 +1944,25 @@ body::after {
   scroll-behavior: smooth;
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
+  scroll-snap-type: none;
+  touch-action: pan-y;
 }
 @media (max-width: 700px) {
   .offers.no-pin .offers-sticky {
     --card: 80vw;
     padding: 64px 0 56px;
   }
-  /* Pe telefon cardul activ sta la stanga, urmatorul se vede in dreapta; un swipe = un card. */
+  /* Pe telefon cardul activ sta la stanga, urmatorul se vede in dreapta; un swipe = un card.
+     Swipe-ul e facut in JS: snap-ul nativ face pagina sa sara sus-jos cand apare/dispare bara de adrese. */
   .offers.no-pin .offers-track {
     padding: 8px calc(100% - var(--card) - 16px) 8px 16px;
-    scroll-padding-left: 16px;
   }
   .offers.no-pin .offer {
     scroll-snap-align: start;
-    scroll-snap-stop: always;
     transform-origin: left center;
+  }
+  .offers {
+    overflow-anchor: none;
   }
 }
 

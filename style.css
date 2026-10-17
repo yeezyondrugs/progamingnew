@@ -802,7 +802,7 @@ h2 {
   align-items: start;
 }
 .contact-info h3,
-.contact-form h3 {
+.contact-call h3 {
   margin-bottom: 26px;
   font-size: 1.15rem;
   text-transform: uppercase;
@@ -1991,4 +1991,185 @@ body::after {
   background:
     radial-gradient(46% 40% at 50% 58%, rgba(255, 255, 255, 0.11), transparent 72%),
     radial-gradient(70% 34% at 50% 100%, rgba(255, 255, 255, 0.05), transparent 70%);
+}
+
+/* Rezervare prin telefon (inlocuieste formularul) */
+.call-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.call-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.call-status.open {
+  color: var(--ink);
+}
+.call-status.open .call-dot {
+  background: #3ddc84;
+  box-shadow: 0 0 0 4px rgba(61, 220, 132, 0.18);
+}
+.call-status.closed .call-dot {
+  background: #ff5a5a;
+}
+.call-number {
+  display: block;
+  margin-bottom: 22px;
+  font-family: var(--display);
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  white-space: nowrap;
+}
+.call-pick {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+}
+.call-pick[hidden],
+.call-qr[hidden] {
+  display: none;
+}
+.call-pick span {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.call-pick strong {
+  font-weight: 500;
+}
+.call-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.call-actions .btn-block {
+  grid-column: 1 / -1;
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+.call-chat i {
+  font-size: 1rem;
+}
+.call-qr {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 22px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.call-qr-code {
+  flex: none;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--ink);
+  line-height: 0;
+}
+.call-qr-code img,
+.call-qr-code canvas {
+  width: 112px;
+  height: 112px;
+}
+.call-copy {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.call-steps {
+  margin-top: 28px;
+  border-top: 1px solid var(--line);
+}
+.call-steps h4 {
+  padding: 18px 0 6px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.call-steps ol {
+  list-style: none;
+  counter-reset: step;
+}
+.call-steps li {
+  display: grid;
+  grid-template-columns: 28px 120px 1fr;
+  align-items: baseline;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  counter-increment: step;
+}
+.call-steps li::before {
+  content: '0' counter(step);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+}
+.call-steps li span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.call-fab {
+  display: none;
+}
+@media (pointer: coarse), (max-width: 700px) {
+  .call-fab {
+    position: fixed;
+    right: 16px;
+    bottom: 78px;
+    z-index: 150;
+    display: grid;
+    place-items: center;
+    width: 50px;
+    height: 50px;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 1.05rem;
+    transition:
+      opacity 0.2s,
+      visibility 0.2s;
+  }
+  .call-fab.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+@media (max-width: 700px) {
+  .call-steps li {
+    grid-template-columns: 28px 1fr;
+  }
+  .call-steps li span {
+    grid-column: 2;
+  }
+}
+@media (pointer: coarse), (max-width: 899px) {
+  .call-qr {
+    display: none !important;
+  }
 }

@@ -19,7 +19,7 @@
         />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
         <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css" />
-        <link rel="stylesheet" href="style.css?v=28" />
+        <link rel="stylesheet" href="style.css?v=30" />
     </head>
     <body>
         <div class="entry" id="entry">
@@ -347,13 +347,13 @@
             <div class="section-header">
                 <div class="section-badge">Estimare rapidă</div>
                 <h2>Calculează costul sesiunii</h2>
-                <p>Alege echipamentul, ziua și durata — vezi imediat cât costă.</p>
+                <p>Alege PC-ul, ziua și durata — vezi imediat cât costă.</p>
             </div>
 
             <div class="calc" id="calc">
                 <div class="calc-controls">
                     <div class="calc-group" role="group" aria-labelledby="calcL1">
-                        <span class="calc-label" id="calcL1">Echipament</span>
+                        <span class="calc-label" id="calcL1">PC</span>
                         <div class="calc-options">
                             <button type="button" class="calc-opt" data-group="type" data-value="vip" aria-pressed="true">
                                 VIP PC
@@ -471,7 +471,7 @@
             <div class="section-header">
                 <div class="section-badge">Contact</div>
                 <h2>Rezervă un loc</h2>
-                <p>Completează formularul sau sună direct. Răspundem rapid.</p>
+                <p>Rezervările se fac prin telefon. Sună sau scrie-ne pe Viber ori WhatsApp.</p>
             </div>
             <div class="contact-grid">
                 <div class="contact-info">
@@ -517,57 +517,65 @@
                         </div>
                     </div>
                 </div>
-                <div class="contact-form">
-                    <h3>Formular de rezervare</h3>
-                    <form id="reservationForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="name">Nume</label>
-                                <input type="text" id="name" name="name" required placeholder="Numele tău" />
-                            </div>
-                            <div class="form-group">
-                                <label for="phone">Telefon</label>
-                                <input type="tel" id="phone" name="phone" required placeholder="06xx xxx xxx" />
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="type">Tip stație</label>
-                                <select id="type" name="type" required>
-                                    <option value="">Alege...</option>
-                                    <option value="vip-pc">VIP PC</option>
-                                    <option value="vip-pc-plus">VIP PC+</option>
-                                    <option value="ps5">PlayStation 5</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="duration">Durată</label>
-                                <select id="duration" name="duration" required>
-                                    <option value="">Alege...</option>
-                                    <option value="1h">1 oră</option>
-                                    <option value="3h">3 ore</option>
-                                    <option value="6h">6 ore</option>
-                                    <option value="night">Pachet de noapte</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="date">Data preferată</label>
-                            <input type="date" id="date" name="date" required />
-                        </div>
-                        <div class="form-group">
-                            <label for="message">Mesaj (opțional)</label>
-                            <textarea
-                                id="message"
-                                name="message"
-                                placeholder="Detalii suplimentare, număr de persoane etc."
-                            ></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <i class="fas fa-paper-plane"></i>
-                            Trimite rezervarea
-                        </button>
-                    </form>
+                <div class="contact-call">
+                    <h3>Rezervă prin telefon</h3>
+                    <p class="call-status" id="callStatus">
+                        <span class="call-dot"></span>
+                        <span id="callStatusText">Deschis zilnic 10:00 – 06:00</span>
+                    </p>
+                    <a href="tel:+37376764676" class="call-number">076 764 676</a>
+                    <div class="call-pick" id="callPick" hidden>
+                        <span>Ai ales în calculator</span>
+                        <strong id="callPickText"></strong>
+                    </div>
+                    <div class="call-actions">
+                        <a href="tel:+37376764676" class="btn btn-block">
+                            <i class="fas fa-phone-alt"></i>
+                            Sună acum
+                        </a>
+                        <a
+                            href="viber://chat?number=%2B37376764676"
+                            class="btn btn-secondary call-chat"
+                            id="callViber"
+                        >
+                            <i class="fab fa-viber"></i>
+                            Viber
+                        </a>
+                        <a
+                            href="https://wa.me/37376764676"
+                            class="btn btn-secondary call-chat"
+                            id="callWhatsapp"
+                            target="_blank"
+                            rel="noopener"
+                        >
+                            <i class="fab fa-whatsapp"></i>
+                            WhatsApp
+                        </a>
+                    </div>
+                    <div class="call-qr" id="callQr" hidden>
+                        <div class="call-qr-code" id="callQrCode"></div>
+                        <p>
+                            Ești pe calculator? Scanează codul cu telefonul ca să suni direct sau
+                            <button type="button" class="call-copy" data-copy="076 764 676">copiază numărul</button>.
+                        </p>
+                    </div>
+                    <div class="call-steps">
+                        <h4>Ce să spui la telefon</h4>
+                        <ol>
+                            <li>
+                                <b>Stația</b>
+                                <span>VIP PC, VIP PC+ sau PS5</span>
+                            </li>
+                            <li>
+                                <b>Durata</b>
+                                <span>1 oră, 3 ore, 6 ore sau pachet de noapte</span>
+                            </li>
+                            <li>
+                                <b>Ziua și ora</b>
+                                <span>când vii și câte persoane sunteți</span>
+                            </li>
+                        </ol>
+                    </div>
                 </div>
             </div>
         </section>
@@ -654,21 +662,31 @@
             </div>
         </footer>
 
+        <a href="tel:+37376764676" class="call-fab" id="callFab" aria-label="Sună pentru rezervare">
+            <i class="fas fa-phone-alt" aria-hidden="true"></i>
+        </a>
+
         <a href="#harta" class="map-fab" id="mapFab" aria-label="Vezi locația pe hartă">
             <i class="fas fa-location-dot" aria-hidden="true"></i>
         </a>
 
         <div class="toast" id="toast">
             <i class="fas fa-check-circle"></i>
-            <span>Rezervarea a fost trimisă! Te contactăm în curând.</span>
+            <span>Numărul a fost copiat.</span>
+        </div>
+
+        <div class="toast" id="viberToast">
+            <i class="fab fa-viber"></i>
+            <span>Nu s-a deschis Viber? Caută-ne în Viber la 076 764 676 sau sună direct.</span>
         </div>
 
         <script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
         <script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
-        <script src="logo-data.js?v=28"></script>
-        <script src="entry.js?v=28"></script>
-        <script src="map.js?v=28"></script>
-        <script src="scene.js?v=28"></script>
-        <script src="script.js?v=28"></script>
+        <script src="logo-data.js?v=30"></script>
+        <script src="entry.js?v=30"></script>
+        <script src="map.js?v=30"></script>
+        <script src="scene.js?v=30"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+        <script src="script.js?v=30"></script>
     </body>
 </html>

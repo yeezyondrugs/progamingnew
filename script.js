@@ -235,7 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const NAMES = { vip: 'VIP PC', vipplus: 'VIP PC+', ps5: 'PS5' };
         const DAYS = { week: 'Luni–Joi', weekend: 'Vineri–Duminică' };
         const DURS = { '1h': '1 oră', '3h': '3 ore', '6h': '6 ore', night: 'Noapte 23:00–06:00' };
-        const FORM_TYPES = { vip: 'vip-pc', vipplus: 'vip-pc-plus', ps5: 'ps5' };
         const state = { type: 'vip', day: 'week', dur: '1h' };
 
         const valueEl = document.getElementById('calcValue');
@@ -277,13 +276,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.getElementById('calcReserve').addEventListener('click', () => {
-            document.getElementById('type').value = FORM_TYPES[state.type];
-            document.getElementById('duration').value = state.dur;
+            const price = PRICES[state.type][state.day][state.dur];
+            const pick = `${NAMES[state.type]} · ${DURS[state.dur]} · ${DAYS[state.day]} · ${price} lei`;
+            const text = `Bună! Vreau să rezerv: ${pick}.`;
+            document.getElementById('callPickText').textContent = pick;
+            document.getElementById('callPick').hidden = false;
+            document.getElementById('callWhatsapp').href =
+                `https://wa.me/37376764676?text=${encodeURIComponent(text)}`;
         });
     }
 
     const revealTargets = document.querySelectorAll(
-        '.statement-text, .statement-stats li, .section-header, .calc, .service-card, .contact-info, .contact-form, .stop-card, .hero-content',
+        '.statement-text, .statement-stats li, .section-header, .calc, .service-card, .contact-info, .contact-call, .stop-card, .hero-content',
     );
     if (!motionOff && 'IntersectionObserver' in window) {
         const revealObserver = new IntersectionObserver(
@@ -320,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => toast.classList.remove('show'), duration);
     };
 
-    const copyToast = document.getElementById('copyToast');
+    const copyToast = document.getElementById('copyToast') || document.getElementById('toast');
     document.querySelectorAll('[data-copy]').forEach((button) => {
         button.addEventListener('click', async () => {
             try {
@@ -332,15 +336,71 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const form = document.getElementById('reservationForm');
-    if (form) {
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            showToast(document.getElementById('toast'), 4000);
-            form.reset();
+    // Programul e 10:00 – 06:00 zilnic, ora Chisinaului; inchis doar intre 06:00 si 10:00.
+    const callStatus = document.getElementById('callStatus');
+    if (callStatus) {
+        const updateStatus = () => {
+            let hour;
+            try {
+                hour = Number(
+                    new Intl.DateTimeFormat('en-GB', {
+                        hour: 'numeric',
+                        hourCycle: 'h23',
+                        timeZone: 'Europe/Chisinau',
+                    }).format(new Date()),
+                );
+            } catch {
+                return;
+            }
+            const open = hour >= 10 || hour < 6;
+            callStatus.classList.toggle('open', open);
+            callStatus.classList.toggle('closed', !open);
+            document.getElementById('callStatusText').textContent = open
+                ? 'Deschis acum · până la 06:00'
+                : 'Închis acum · deschidem la 10:00';
+        };
+        updateStatus();
+        setInterval(updateStatus, 60000);
+    }
+
+    const callQr = document.getElementById('callQr');
+    const callFab = document.getElementById('callFab');
+    // Codul QR are sens doar pe PC: pe telefon suni direct.
+    const desktop = window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 900px)').matches;
+    if (callQr && desktop && window.QRCode) {
+        new QRCode(document.getElementById('callQrCode'), {
+            text: 'tel:+37376764676',
+            width: 112,
+            height: 112,
+            colorDark: '#08080a',
+            colorLight: '#f3f1ec',
+        });
+        callQr.hidden = false;
+    }
+    // Viber: pe iPhone numarul merge fara "+", pe Android si PC cu "+".
+    // Daca Viber nu e instalat, linkul nu face nimic, asa ca aratam numarul.
+    const callViber = document.getElementById('callViber');
+    if (callViber) {
+        const ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+        callViber.href = ios ? 'viber://chat?number=37376764676' : 'viber://chat?number=%2B37376764676';
+        const viberToast = document.getElementById('viberToast');
+        callViber.addEventListener('click', () => {
+            const fallback = setTimeout(() => showToast(viberToast, 5000), 1600);
+            const cancel = () => {
+                if (document.hidden) clearTimeout(fallback);
+            };
+            document.addEventListener('visibilitychange', cancel, { once: true });
+            window.addEventListener('blur', () => clearTimeout(fallback), { once: true });
         });
     }
 
-    const dateInput = document.getElementById('date');
-    if (dateInput) dateInput.min = new Date().toISOString().split('T')[0];
+    const contactSection = document.getElementById('contact');
+    if (callFab && contactSection && 'IntersectionObserver' in window) {
+        new IntersectionObserver(
+            ([entry]) => {
+                callFab.classList.toggle('hidden', entry.isIntersecting);
+            },
+            { threshold: 0.2 },
+        ).observe(contactSection);
+    }
 });

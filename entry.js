@@ -604,9 +604,7 @@
 
     const clamp01 = (value) => Math.min(Math.max(value, 0), 1);
     const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-    // Pornire si oprire foarte line (acceleratia e zero la capete).
-    const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10);
-    const DURATION = 5600;
+    const DURATION = 5000;
     const sway = { x: 0, y: 0 };
     const swayFrom = { x: 0, y: 0 };
     const point = new THREE.Vector3();
@@ -640,8 +638,10 @@
         settle();
         entry.classList.add('leaving');
         document.documentElement.classList.remove('entry-lock');
+        // Oprim randarea intrarii imediat: canvasul pastreaza ultimul cadru cat se estompeaza,
+        // iar placa video ramane libera pentru scena PC-ului de pe pagina.
+        cancelAnimationFrame(frame);
         setTimeout(() => {
-            cancelAnimationFrame(frame);
             window.removeEventListener('resize', resize);
             renderer.dispose();
             entry.remove();
@@ -652,30 +652,28 @@
         const gap = time - lastGap;
         lastGap = time;
         if (gap > 0 && gap < 250) frameAvg += (gap - frameAvg) * 0.1;
-        // Calitatea se ajusteaza doar inainte de zbor, ca sa nu sacadeze in timpul lui.
-        if (!startedAt && ++frameCount % 30 === 0 && frameAvg > 26 && quality > 0.45) {
+        if (++frameCount % 30 === 0 && frameAvg > 26 && quality > 0.45) {
             quality = Math.max(0.45, quality * 0.75);
             renderer.setPixelRatio(basePixelRatio * quality);
             resize();
             frameAvg = 18;
         }
         const flight = startedAt ? clamp01((time - startedAt) / DURATION) : 0;
-        const eased = smoother(flight);
+        const eased = easeInOut(flight);
 
-        // getPointAt merge cu viteza constanta pe curba, fara accelerari bruste intre puncte.
-        positions.getPointAt(eased, camera.position);
+        positions.getPoint(eased, camera.position);
         if (!startedAt) {
             sway.x = Math.sin(time * 0.0003) * 0.6;
             sway.y = Math.sin(time * 0.0005) * 0.1;
         } else {
             // Leganarea de asteptare se stinge treptat, nu dispare brusc la click.
-            const keep = 1 - smoother(clamp01(flight / 0.3));
+            const keep = 1 - easeInOut(clamp01(flight / 0.3));
             sway.x = swayFrom.x * keep;
             sway.y = swayFrom.y * keep;
         }
         camera.position.x += sway.x;
         camera.position.y += sway.y;
-        targets.getPointAt(eased, point);
+        targets.getPoint(eased, point);
         camera.lookAt(point);
 
         const open = easeInOut(clamp01((flight - 0.04) / 0.3));
@@ -692,8 +690,11 @@
         });
 
         renderer.render(scene, camera);
-        if (flight >= 0.93) finish();
-        if (!finished || entry.isConnected) frame = requestAnimationFrame(render);
+        if (flight >= 1) {
+            finish();
+            return;
+        }
+        frame = requestAnimationFrame(render);
     };
 
     const start = () => {

@@ -568,7 +568,8 @@
         lastTime = time;
 
         const rect = section.getBoundingClientRect();
-        const goal = motionOff ? 0.86 : clamp01(-rect.top / (rect.height - window.innerHeight));
+        // Desfacerea PC-ului urmeaza derularea si cu animatiile reduse: o controleaza utilizatorul.
+        const goal = clamp01(-rect.top / (rect.height - window.innerHeight));
         eased = eased < 0 ? goal : eased + (goal - eased) * Math.min(1, delta * 5);
         const progress = eased;
         const rise = smooth(clamp01(progress / 0.16));
@@ -671,7 +672,6 @@
         setStyle('bar', (progress * 100).toFixed(1), (v) => (bar.style.width = `${v}%`));
     };
 
-    if (motionOff) section.classList.add('scene-still');
     resize();
     window.addEventListener('resize', resize);
     window.addEventListener('pointermove', (event) => {
